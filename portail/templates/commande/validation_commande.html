@@ -1,0 +1,39 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Validation Commande{% endblock %}
+
+{% block content %}
+<h2>📝 Détails de la commande #{{ commande.id_commande }}</h2>
+{% if bon_de_commande %}
+  <p>
+    <a href="{{ bon_de_commande.fichier.url }}" class="btn btn-outline-primary" target="_blank">
+      📄 Voir le bon de commande
+    </a>
+  </p>
+{% else %}
+  <p class="text-muted">Aucun bon de commande associé à cette commande.</p>
+{% endif %}
+<p><strong>Client :</strong> {{ commande.client.nom_entreprise }}</p>
+<p><strong>Date demandée de livraison :</strong> {{ commande.date_livraison|date:"d/m/Y" }}</p>
+<p><strong>Certificat d'analyse requis :</strong> {{ commande.requiert_certificat_analyse|yesno:"Oui,Non" }}</p>
+<p><strong>Attestation requise :</strong> {{ commande.requiert_attestation|yesno:"Oui,Non" }}</p>
+{% if commande.commentaire %}
+<p><strong>Commentaire du client :</strong> {{ commande.commentaire }}</p>
+{% endif %}
+<p><strong>💰 Total à payer :</strong> {{ commande.prix_total }} FCFA</p>
+<hr>
+<h4 class="mt-4">✅ Valider la commande</h4>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" name="accept" class="btn btn-success">Accepter</button>
+</form>
+<hr>
+<h4 class="mt-4">❌ Refuser la commande</h4>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label for="commentaire" class="form-label">Motif du refus :</label>
+    <textarea class="form-control" name="commentaire" id="commentaire" rows="3" required></textarea>
+  </div>
+  <button type="submit" name="refuse" class="btn btn-danger">Refuser</button>
+</form>
+{% endblock %}

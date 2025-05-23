@@ -1,0 +1,42 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Offres Client{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">📑 Mes Proformas</h2>
+
+<div class="row">
+  <!-- Colonne pour les nouveaux produits -->
+  <div class="col-md-6">
+    <h4>🆕 Proformas pour nouveaux produits</h4>
+    {% for proforma in proformas_nouveaux %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Offre #{{ proforma.id }}</h5>
+        <p><strong>Date :</strong> {{ proforma.date_envoie|date:"d/m/Y" }}</p>
+        <p><strong>Total HT :</strong> {{ proforma.montant_total_ht }} FCFA</p>
+        <a href="{% url 'detail_proforma_client' proforma.id %}" class="btn btn-primary btn-sm">🔎 Détail</a>
+      </div>
+    </div>
+    {% empty %}
+    <p>Aucune offre disponible pour nouveaux produits.</p>
+    {% endfor %}
+  </div>
+  <!-- Colonne pour les anciens produits -->
+<div class="col-md-6">
+  <h4>🧾 Proformas pour produits existants</h4>
+  {% for proforma in proformas_anciens %}
+  <div class="card mb-3 shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">Offre #{{ proforma.id }}</h5>
+      <p><strong>Date :</strong> {{ proforma.date_envoie|date:"d/m/Y" }}</p>
+      <p><strong>Total HT :</strong> {{ proforma.montant_total_ht }} FCFA</p>
+      <a href="{% url 'detail_proforma_client' proforma.id %}" class="btn btn-primary btn-sm">🔎 Détail</a>
+    </div>
+  </div>
+  {% empty %}
+  <p>Aucune offre disponible pour produits existants.</p>
+  {% endfor %}
+</div>
+</div>
+
+{% endblock %}

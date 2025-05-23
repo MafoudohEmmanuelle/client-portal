@@ -1,0 +1,54 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}📁 Documents par Commande{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">📦 Documents classés par commande</h2>
+{% for bloc in page_obj %}
+  <div class="mb-4">
+    <h4 class="text-primary">👤 {{ bloc.client.nom_entreprise }}</h4>
+
+    {% for c in bloc.commandes %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <strong>Commande #{{ c.commande.id }}</strong>
+          <span>{{ c.commande.date_creation|date:"d/m/Y" }}</span>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% if c.uploaded_documents %}
+            <li class="list-group-item bg-light">📄 Documents téléversés :</li>
+            {% for doc in c.uploaded_documents %}
+              <li class="list-group-item d-flex justify-content-between">
+                {{ doc.get_type_documents_display }} - {{ doc.date_upload }}
+                <a href="{{ doc.fichier.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Voir</a>
+              </li>
+            {% endfor %}
+          {% endif %}
+          {% if c.proformas %}
+            <li class="list-group-item bg-light">📤 Proformas générés :</li>
+            {% for p in c.proformas %}
+              <li class="list-group-item d-flex justify-content-between">
+                Proforma - {{ p.date_creation|date:"d/m/Y H:i" }}
+                <a href="{{ p.doc.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Voir</a>
+              </li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+    {% endfor %}
+  </div>
+{% endfor %}
+<nav aria-label="Pagination">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a></li>
+      {% endif %}
+      <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span></li>
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+<div class="d-flex justify-content-between mt-4">
+  <a href="{% url 'chef_dashboard' %}" class="btn btn-secondary">← Retour</a>
+</div>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block title %}Visualiser Proforma {% endblock %}
+
+{% block content %}
+<style>
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+
+    body {
+      font-family: Verdana, sans-serif;
+      font-size: 12px;
+      color: #000;
+      line-height: 1.4;
+    }
+
+    h1 {
+      text-align: center;
+      text-transform: uppercase;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .header, .footer {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .info-block {
+      margin-bottom: 20px;
+    }
+
+    .info-block p {
+      margin: 3px 0;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .table th, .table td {
+      border: 1px solid #000;
+      padding: 6px;
+      text-align: left;
+    }
+
+    .totaux {
+      margin-top: 20px;
+    }
+
+    .totaux td {
+      padding: 6px;
+    }
+
+    .signature {
+      margin-top: 30px;
+      text-align: right;
+    }
+
+    .banques {
+      margin-top: 30px;
+    }
+
+    .banques th {
+      background-color: #f0f0f0;
+    }
+
+    .montant-en-lettres {
+      font-weight: bold;
+      margin-top: 10px;
+      font-style: italic;
+    }
+  </style>
+<div class="container">
+  <div class="card mb-3 shadow-sm">
+    <div class="card-body">
+      <div class="header">
+        <img src="{% static 'images/logo.png' %}" alt="Logo" width="150">
+        <h2>DEVIS SC {{ proforma.pk|stringformat:"05d" }}</h2>
+        <p><em>{{ proforma.date_envoie|date:"d/m/Y" }}</em></p>
+      </div>
+    
+      <div class="info-block">
+        <p><strong>Contact client :</strong> {{ proforma.client.interlocuteur }} - {{ proforma.client.telephone }}</p>
+        <p><strong>Contact Fournisseur :</strong>{{ proforma.client.commercial.nom_commercial }} - {{ proforma.client.commercial.contact }} </p>
+        <p><strong>Adresse de facturation :</strong> {{ proforma.client.nom_entreprise }} <br> {{ proforma.client.pays }},{{ proforma.client.ville }},{{ proforma.client.rue}}</p>
+        <p><strong>Modalités règlement :</strong> {{ proforma.modalites_reglement }}</p>
+        {% if proforma.client.type_client == 'local' %}
+        <p><strong>TVA :</strong> 19.25%</p>
+        {% endif %}
+      </div>
+    
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Désignation</th>
+            <th>Quantité</th>
+            <th>Unité</th>
+            <th>Prix Unitaire</th>
+            <th>Montant</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in proforma.items.all %}
+          <tr>
+            <td>{{ item.designation }}</td>
+            <td>{{ item.quantite }}</td>
+            <td>{{ item.unite }}</td>
+            <td>{{ item.prix_unitaire|floatformat:0 }}</td>
+            <td>{{ item.montant|floatformat:0 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    
+      <table class="totaux">
+        <tr><td><strong>Total HT :</strong></td><td>{{ proforma.montant_total_ht|floatformat:0 }}</td></tr>
+        {% if proforma.tva and proforma.tva|floatformat:0 != "0" %}
+        <tr>
+          <td><strong>TVA :</strong></td>
+          <td>{{ proforma.tva|floatformat:0 }}</td>
+        </tr>
+        {% elif proforma.condition_ht %}
+        <tr>
+          <td><strong>Condition HT :</strong></td>
+          <td>{{ proforma.condition_ht }}</td>
+        </tr>
+        {% endif %}
+        <tr><td><strong>Net à payer :</strong></td><td>{{ proforma.net_a_payer|floatformat:0 }}</td></tr>
+      </table>
+    
+      <p class="montant-en-lettres">
+        Arrêté la présente proforma au montant de : {{ proforma.net_a_payer_lettres }}
+      </p>
+    
+      <div class="banques">
+        <h3>Coordonnées Bancaires Multiprint Sérigraphie</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Banque</th>
+              <th>Code Banque</th>
+              <th>Guichet</th>
+              <th>N° Compte</th>
+              <th>Clé</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for banque in banques %}
+            <tr>
+              <td>{{ banque.banque }}</td>
+              <td>{{ banque.code_banque }}</td>
+              <td>{{ banque.code_guichet }}</td>
+              <td>{{ banque.num_compte }}</td>
+              <td>{{ banque.cle }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    
+      <div class="signature">
+        <p>>{{ proforma.client.commercial.nom_commercial }}</p>
+        <p><em>{{ proforma.date_envoie|date:"d F Y" }}</em></p>
+      </div>
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form method="post" action="{% url 'envoyer_proforma' proforma.id %}">
+            {% csrf_token %}
+            {{form.as_p}}
+            <button type="submit" class="btn btn-success">Envoyer au CMC</button>
+            {% if proforma.devis %}
+              <a href="{% url 'creer_proforma' proforma.devis.id %}" class="btn btn-secondary">Retour</a>
+            {% elif proforma.quote %}
+              <a href="{% url 'creer_proforma_old' proforma.quote.id %}" class="btn btn-secondary">Retour</a>
+            {% else %}
+              <span class="text-muted">Provenance inconnue</span>
+            {% endif %}
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "dashboard/base.html" %}
+{% block title %}
+  {% if from_lead %}
+    Validation du lead
+  {% else %}
+    Enregistrement Client
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card shadow-sm p-4 mx-auto" style="max-width: 900px;">
+    <h2 class="text-center mb-4">
+      {% if from_lead %}
+        Valider le prospect : {{ lead.raison_sociale }}
+      {% else %}
+        Enregistrer un nouveau client
+      {% endif %}
+    </h2>
+    <form method="POST" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <div class="row">
+        <!-- LEFT COLUMN: Info client -->
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label class="form-label">Nom de l'entreprise</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-building"></i></span>
+              {{ form.nom_entreprise }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Interlocuteur</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              {{ form.interlocuteur }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Adresse e-mail</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+              {{ form.email }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Téléphone</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+              {{ form.telephone }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Secteur d'activité</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+              {{ form.secteur_activite }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Origine du client</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-question-circle"></i></span>
+              {{ form.origine_client }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Type de client</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              {{ form.type_client }}
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Localisation -->
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label class="form-label">Pays</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-flag"></i></span>
+              {{ form.pays }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Ville</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+              {{ form.ville }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Rue</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-signpost"></i></span>
+              {{ form.rue }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Boîte postale</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-mailbox"></i></span>
+              {{ form.bp }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Commercial</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-mailbox"></i></span>
+              {{ form.commercial }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-4">
+        <button type="submit"class="btn btn-danger btn-lg">
+          {% if from_lead %} Valider et créer le client {% else %} Enregistrer {% endif %}
+        </button>
+      </div>
+    </form>
+    {% if form.errors %}
+  <div class="alert alert-danger">
+    <ul>
+      {% for field in form %}
+        {% for error in field.errors %}
+          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+        {% endfor %}
+      {% endfor %}
+      {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+<div class="d-flex gap-2">
+  {% if from_lead %} <a href="{% url 'liste_lead' %}" class="btn btn-secondary">↩️ Retour</a> 
+  {% else %} <a href="{% url 'liste_client_cmc' %}" class="btn btn-secondary">↩️ Retour</a> {% endif %}
+</div>
+  </div>
+</div>
+
+
+<script>
+  const countryPrefixes = {
+    'FR': '+33', 'BE': '+32', 'CH': '+41', 'DE': '+49',
+    'ES': '+34', 'IT': '+39', 'MA': '+212', 'US': '+1', 'UK': '+44'
+  };
+
+  const paysSelect = document.querySelector('select[name="pays"]');
+  const telInput = document.querySelector('input[name="telephone"]');
+
+  function setPrefix() {
+    const selected = paysSelect?.value;
+    const prefix = countryPrefixes[selected];
+    if (!prefix) return;
+    if (telInput && (telInput.value === '' || !telInput.value.startsWith('+'))) {
+      telInput.value = prefix + ' ';
+    }
+  }
+
+  if (paysSelect && telInput) {
+    paysSelect.addEventListener('change', setPrefix);
+    window.addEventListener('load', setPrefix);
+  }
+</script>
+{% endblock %}

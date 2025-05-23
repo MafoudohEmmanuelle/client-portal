@@ -1,0 +1,23 @@
+# Python
+*.pyc
+__pycache__/
+
+# Django
+db.sqlite3
+/media/
+*.log
+
+# Environments
+.env
+.env.*
+
+# VSCode & OS files
+.vscode/
+.DS_Store
+
+# Static files (collected)
+staticfiles/
+static/
+
+# PostgreSQL
+*.psql

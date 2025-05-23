@@ -1,0 +1,33 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Détails de la Commande{% endblock %}
+
+{% block content %}
+<h2>Commande #{{ commande.id }}</h2>
+
+<ul class="list-group mb-4">
+  <li class="list-group-item"><strong>Client :</strong>{{ commande.client.nom_entreprise}}</li>
+  <li class="list-group-item"><strong>Date création :</strong> {{ commande.date_creation|date:"d/m/Y" }}</li>
+  <li class="list-group-item"><strong>Date livraison :</strong> {{ commande.date_livraison }}</li>
+  <li class="list-group-item"><strong>Statut :</strong> {{ commande.get_statut_display }}</li>
+  <li class="list-group-item"><strong>Commentaire client :</strong> {{ commande.commentaire|default:"-" }}</li>
+</ul>
+<h5>Total : {{ commande.prix_total }} FCFA</h5>
+{% if commande.statut == 'accepted' %}
+  <a href="{% url 'upload_document' commande.id %}" class="btn btn-success mt-3">
+    <i class="bi bi-upload"></i> Téléverser une facture
+  </a>
+{% endif %}
+
+<h4>Documents :</h4>
+<ul class="list-group">
+  {% for doc in documents %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      {{ doc.get_type_documents_display }} 
+      <a href="{{ doc.fichier.url }}" target="_blank" class="btn btn-outline-primary btn-sm">Voir</a>
+    </li>
+  {% empty %}
+    <li class="list-group-item">Aucun document téléversé pour cette commande.</li>
+  {% endfor %}
+</ul>
+<a href="{% url 'liste_commandes' %}" class="btn btn-outline-primary mt-3">← Retour</a>
+{% endblock %}

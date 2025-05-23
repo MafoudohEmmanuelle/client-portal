@@ -1,0 +1,52 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Commande #{{ commande.id_commande }}{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">Détail de la commande #{{ commande.id_commande }}</h3>
+
+<ul class="list-group mb-4">
+  <li class="list-group-item"><strong>Date de création :</strong> {{ commande.date_creation|date:"d/m/Y" }}</li>
+  <li class="list-group-item"><strong>Date de livraison prévue :</strong> {{ commande.date_livraison|date:"d/m/Y" }}</li>
+  <li class="list-group-item"><strong>Statut :</strong>
+    {% if commande.statut == "en_attente" %}
+      <span class="badge bg-secondary">En attente</span>
+    {% elif commande.statut == "accepted" %}
+      <span class="badge bg-warning text-dark">En production</span>
+    {% elif commande.statut == "delivered" %}
+      <span class="badge bg-success">Livrée</span>
+    {% elif commande.statut == "rejected" %}
+      <span class="badge bg-danger">Refusée</span>
+    {% endif %}
+  </li>
+  <li class="list-group-item"><strong>Commentaire :</strong> {{ commande.commentaire|default:"—" }}</li>
+</ul>
+
+<div class="text-end mt-4">
+  <h5 class="fw-bold">Total : {{ commande.prix_total }} FCFA</h5>
+</div>
+
+<h4>Documents :</h4>
+<ul class="list-group">
+  {% for doc in commande.documents.all %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      {{ doc.get_type_documents_display }} 
+      {% if doc.peut_etre_signer and not doc.signe_par and doc.type_documents == 'bon_livraison' %}
+        <a href="{% url 'signer_document' doc.id_document %}" class="btn btn-outline-success btn-sm">Signer</a>
+      {% elif doc.signe_par %}
+        <span class="badge bg-success">Signé le {{ doc.date_signature|date:"d/m/Y à H:i" }}</span>
+      {% endif %}
+      <a href="{{ doc.fichier.url }}" target="_blank" class="btn btn-outline-primary btn-sm ms-2">Voir</a>
+    </li>
+  {% empty %}
+    <li class="list-group-item">Aucun document téléversé pour cette commande.</li>
+  {% endfor %}
+  {% if generated_proforma %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      Proforma
+      <a href="{{ generated_proforma.doc.url }}" class="btn btn-sm btn-outline-success" target="_blank">Voir le Proforma</a>
+    </li>
+  {% endif %}
+</ul>
+
+<a href="{% url 'commandes_client' %}" class="btn btn-outline-primary mt-3">← Retour à mes commandes</a>
+{% endblock %}

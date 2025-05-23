@@ -1,0 +1,45 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Tableau de bord Commercial{% endblock %}
+
+{% block content %}
+  <h2>Bienvenue, {{ user.username }} </h2>
+  <p>Voici un aperçu de vos activités.</p>
+  <h3 class="mb-4 text-center">📄 Feuille de Demmande de Devis à traiter</h3>
+
+{% if unread_devis %}
+<table class="table table-bordered bg-white shadow-sm">
+  <thead class="table-light">
+    <tr>
+      <th>#</th>
+      <th>Client</th>
+      <th>Commercial</th>
+      <th>Produit demandé</th>
+      <th>Date de soumission</th>
+      <th>Statut</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for devis in unread_devis %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ devis.client.nom_entreprise}}</td>
+      <td>{{ devis.client.commercial.nom_commercial}}</td>
+      <td>{{ devis.designation_produit }}</td>
+      <td>{{ devis.date_creation|date:"d/m/Y" }}</td>
+      <td><span class="badge bg-primary">{{ devis.get_statut_display }}</span></td>
+      <td>
+        <a href="{% url 'traiter_devis_be' devis.id %}" class="btn btn-sm btn-success">✏️ Traiter</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="6" class="text-center">Aucun devis en attente</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <div class="alert alert-info mt-4">Aucun devis à afficher.</div>
+{% endif %}  
+{% endblock %}

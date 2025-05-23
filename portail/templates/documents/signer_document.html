@@ -1,0 +1,50 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Signature du document{% endblock %}
+
+{% block content %}
+<h3>Signer le document : {{ document.get_type_documents_display }}</h3>
+<p>Commande #{{ document.commande.id_commande }} | {{ document.commande.client.entreprise }}</p>
+
+<canvas id="signature-pad" class="border" width=400 height=200></canvas>
+
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="signature" id="signature-input">
+  <button type="submit" class="btn btn-success mt-3">Signer</button>
+  <button type="button" class="btn btn-secondary mt-3" onclick="clearPad()">Effacer</button>
+</form>
+
+<script>
+  const canvas = document.getElementById('signature-pad');
+  const ctx = canvas.getContext('2d');
+  let drawing = false;
+
+  canvas.addEventListener('mousedown', () => drawing = true);
+  canvas.addEventListener('mouseup', () => drawing = false);
+  canvas.addEventListener('mouseout', () => drawing = false);
+  canvas.addEventListener('mousemove', draw);
+
+  function draw(event) {
+    if (!drawing) return;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#000';
+
+    const rect = canvas.getBoundingClientRect();
+    ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+  }
+
+  function clearPad() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+  }
+
+  document.querySelector('form').addEventListener('submit', function(event) {
+    const dataURL = canvas.toDataURL('image/png');
+    document.getElementById('signature-input').value = dataURL;
+  });
+</script>
+{% endblock %}

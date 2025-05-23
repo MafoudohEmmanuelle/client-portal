@@ -1,0 +1,57 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Créer Proforma - Produits existants{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">🧾 Créer une Proforma pour une demande de cotation</h2>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h5 class="mb-3">Client : {{ quote.client.nom_entreprise }}</h5>
+    <p><strong>Date de la demande :</strong> {{ quote.date_creation|date:"d/m/Y" }}</p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-4">
+        <label for="modalites_reglement" class="form-label">Modalités de règlement</label>
+        {{ form.modalites_reglement }}
+        {% if form.modalites_reglement.errors %}
+          <div class="text-danger">{{ form.modalites_reglement.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-4">
+        <label for="condition_ht" class="form-label">Conditions HT (optionnel)</label>
+        {{ form.condition_ht }}
+        {% if form.condition_ht.errors %}
+          <div class="text-danger">{{ form.condition_ht.errors }}</div>
+        {% endif %}
+      </div>
+
+      <hr>
+      <h5 class="mb-3">Produits et Prix Unitaires :</h5>
+
+      {% for field in form %}
+        {% if field.name != "modalites_reglement" and field.name != "condition_ht" %}
+          <div class="mb-3">
+            {{ field.label_tag }} 
+            {{ field }}
+            {% if field.errors %}
+              <div class="text-danger">{{ field.errors }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      <div class="d-flex mt-4 justify-content-between">
+        <a href="{% url 'detail_quote' quote.id %}" class="btn btn-secondary">
+          <i class="bi bi-arrow-left"></i> Retour
+        </a>
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-send"></i> Créer et Envoyer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

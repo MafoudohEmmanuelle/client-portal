@@ -1,0 +1,20 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Envoie de Document{% endblock %}
+
+{% block content %}
+<h3>Ajouter un document pour la commande #{{ commande.id }}</h3>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="id_type_documents" class="form-label">Type de document</label>
+      {{ form.type_documents }}
+    </div>
+    <div class="mb-3">
+      <label for="id_fichier" class="form-label">Fichier</label>
+      {{ form.fichier }}
+    </div>
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-upload"></i> Uploader
+    </button>
+</form>
+{% endblock %}

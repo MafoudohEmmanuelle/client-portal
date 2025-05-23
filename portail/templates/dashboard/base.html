@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: row;
+      background-color: #f5f6fa;
+    }
+    .sidebar {
+      width: 250px;
+      background-color: #343a40;
+      color: white;
+      min-height: 100vh;
+    }
+    .sidebar a {
+      color: white;
+      padding: 15px;
+      display: block;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+    }
+    .navbar {
+      background-color: white;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .radio-inline {
+        display: inline-block;
+        margin-right: 15px;
+    }
+    .deroulement-img {
+        display: none;
+    }
+    .fixed-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    width: auto;
+    max-width: 90%;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  .blink {
+  animation: blink-animation 0.9s steps(2, start) 3;
+}
+
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+  </style>
+</head>
+<body>
+  {% if messages %}
+  <div class="fixed-message">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Sidebar -->
+  {% if user.is_authenticated %}
+    {% if user.role == "commercial" %}
+      <!-- Sidebar for Commercials -->
+      <div class="sidebar d-flex flex-column p-3">
+        <h4 class="text-center mb-4">Portail Client</h4>
+        <a href="{% url 'commercial_dashboard' %}">Tableau de bord</a>
+        <a href="{% url 'devis_par_client' %}">Devis à traiter</a>
+        <a href="{% url 'liste_client' %}">Mes Clients</a>
+        <a href="{% url 'liste_devis_et_quotes' %}"> Toutes les Demandes</a>
+        <a href="{% url 'commercial_documents' %}">Documents</a>
+        <a href="{% url 'liste_commandes' %}"> Commandes</a>
+      </div>
+    
+    {% elif user.role == "client" %}
+      <!-- Sidebar for Clients -->
+      <div class="sidebar d-flex flex-column p-3">
+        <h4 class="text-center mb-4">Portail Client</h4>
+        <a href="{% url 'client_dashboard' %}">Tableau de bord</a> 
+        <a href="{% url 'produits_client' %}">Catalogue</a> 
+        <a href="{% url 'demande_devis' %}">Demande de Devis</a>
+        <a href="{% url 'offres_client' %}">Offres</a>
+        <a href="{% url 'proformas_acceptees' %}">Passer un Commande</a>
+        <a href="{% url 'mes_documents' %}">Documents</a>
+      </div>
+
+      {% elif user.role == "be" %}
+      <!-- Sidebar for BE -->
+      <div class="sidebar d-flex flex-column p-3">
+        <h4 class="text-center mb-4">Portail Client</h4>
+        <a href="{% url 'be_dashboard' %}">Tableau de bord</a> 
+        <a href="{% url 'be_documents' %}">Documents</a>
+      </div>
+      {% elif user.role == "chef_commercial" %}
+      <!-- Sidebar for CMC -->
+      <div class="sidebar d-flex flex-column p-3">
+        <h4 class="text-center mb-4">Portail Client</h4>
+        <a href="{% url 'chef_dashboard' %}">Tableau de bord</a>  
+        <a href="{% url 'list_proforma' %}">Proforma</a> 
+        <a href="{% url 'liste_client_cmc' %}">Clients</a>
+        <a href="{% url 'liste_lead' %}">Prospects</a>
+        <a href="{% url 'liste_commercial' %}">Commerciaux</a>
+        <a href="#">Commandes</a> 
+        <a href="{% url 'cmc_documents' %}">Documents</a>
+      </div>
+    {% endif %}
+  {% endif %}
+
+
+  <!-- Main Content -->
+  <div class="content w-100">
+    <!-- Top Navbar -->
+    {% include 'dashboard/navbar.html' %}
+    <!-- Dynamic Content -->
+    <main>
+      {% block content %}
+      {% endblock %}
+    </main>
+  </div>
+  <script>
+    setTimeout(function() {
+      const alert = document.querySelector('.fixed-message');
+      if (alert) {
+        alert.style.opacity = '0';
+        alert.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => alert.remove(), 500);
+      }
+    }, 3000);
+  </script>  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Liste des Commandes{% endblock %}
+
+{% block content %}
+<h2>Liste des Commandes</h2>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Client</th>
+      <th>Date de commande</th>
+      <th>Statut</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for commande in page_obj %}
+    <tr>
+      <td>{{ commande.client.nom_entreprise }}</td>
+      <td>{{ commande.date_creation|date:"d/m/Y" }}</td>
+      <td>
+        {% if commande.statut == 'en_attente' %}
+          <span class="badge bg-warning text-dark">En attente</span>
+        {% elif commande.statut == 'accepted' %}
+          <span class="badge bg-success">Validée</span>
+        {% elif commande.statut == 'rejected' %}
+          <span class="badge bg-danger">Refusée</span>
+        {% else %}
+          <span class="badge bg-secondary">{{ commande.statut }}</span>
+        {% endif %}
+      </td>
+      <td>
+          {% if commande.statut == 'en_attente' %}
+            <a href="{% url 'valider_commande' commande.id %}" class="btn btn-sm btn-primary">Consulter</a>
+          {% elif commande.statut == 'accepted' or commande.statut == 'rejected' or commande.statut == 'delivered' %}
+          <a href="{% url 'commande_detail' commande.id %}" class="btn btn-sm btn-outline-secondary">Détails</a>
+          {% endif %}       
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Pagination -->
+<nav aria-label="Pagination commandes">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+    {% endif %}
+
+    <li class="page-item active">
+      <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
+
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+    {% endif %}
+  </ul>
+</nav>
+<a href="{% url 'commercial_dashboard' %}" class="btn btn-outline-primary mt-3">← Retour</a>
+{% endblock %}

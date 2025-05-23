@@ -1,0 +1,72 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Mes Commandes{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Mes Commandes</h2>
+
+<!-- Filtres par statut -->
+<div class="mb-3">
+  <a href="?statut=toutes" class="btn btn-outline-secondary {% if statut_filtre == 'toutes' %}active{% endif %}">Toutes</a>
+  <a href="?statut=pending" class="btn btn-outline-secondary {% if statut_filtre == 'pending' %}active{% endif %}">En attente</a>
+  <a href="?statut=accepted" class="btn btn-outline-secondary {% if statut_filtre == 'accepted' %}active{% endif %}">En production</a>
+  <a href="?statut=delivered" class="btn btn-outline-secondary {% if statut_filtre == 'delivered' %}active{% endif %}">Livrées</a>
+  <a href="?statut=rejected" class="btn btn-outline-secondary {% if statut_filtre == 'rejected' %}active{% endif %}">Refusées</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th>Date</th>
+        <th>Livraison</th>
+        <th>Prix Total</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for commande in page_obj %}
+      <tr onclick="window.location.href='{% url 'commande_detail_client' commande.id %}'" style="cursor:pointer;">
+        <td>{{ commande.id }}</td>
+        <td>{{ commande.date_creation|date:"d/m/Y" }}</td>
+        <td>{{ commande.date_livraison|date:"d/m/Y" }}</td>
+        <td>{{ commande.prix_total }} FCFA</td>
+        <td>
+          {% if commande.statut == "en_attente" %}
+            <span class="badge bg-secondary">En attente</span>
+          {% elif commande.statut == "accepted" %}
+            <span class="badge bg-warning text-dark">En production</span>
+          {% elif commande.statut == "delivered" %}
+            <span class="badge bg-success">Livrée</span>
+          {% elif commande.statut == "rejected" %}
+            <span class="badge bg-danger">Refusée</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-center text-muted">Aucune commande trouvée.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Pagination">
+  <ul class="pagination justify-content-center mt-3">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?statut={{ statut_filtre }}&page={{ page_obj.previous_page_number }}">Précédent</a>
+    </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?statut={{ statut_filtre }}&page={{ page_obj.next_page_number }}">Suivant</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+<a href="{% url 'client_dashboard' %}" class="btn btn-outline-primary mt-3">← Retour</a>
+{% endblock %}

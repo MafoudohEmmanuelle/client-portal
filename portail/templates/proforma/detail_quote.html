@@ -1,0 +1,45 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Détail de la demande de cotation{% endblock %}
+
+{% block content %}
+<h2>📄 Demande de cotation #{{ quote.id }}</h2>
+<p><strong>Client :</strong> {{ quote.client.nom_entreprise }}</p>
+<p><strong>Date de soumission :</strong> {{ quote.date_creation|date:"d/m/Y H:i" }}</p>
+<p><strong>Statut :</strong> 
+  <span class="badge bg-info">{{ quote.get_statut_display }}</span>
+</p>
+
+<h4 class="mt-4">📦 Produits demandés :</h4>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Désignation</th>
+      <th>Quantité</th>
+      <th>Unité</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ item.produit.designation }}</td>
+      <td>{{ item.quantite }}</td>
+      <td>{{ item.unite }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr class="my-4">
+
+<form method="post">
+  {% csrf_token %}
+  <div class="d-flex gap-3">
+    <button type="submit" name="action" value="creer_proforma" class="btn btn-success">
+      ✅ Créer une Proforma
+    </button>
+    <button type="submit" name="action" value="retour" class="btn btn-secondary">
+      🔙 Retour
+    </button>
+  </div>
+</form>
+{% endblock %}

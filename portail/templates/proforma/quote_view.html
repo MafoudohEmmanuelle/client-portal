@@ -1,0 +1,53 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Ma Demande de Devis{% endblock %}
+{% block content %}
+<h2>🧾 Ma demande de devis</h2>
+
+{% if elements %}
+<form method="post" action="{% url 'submit_quote' %}">
+  {% csrf_token %}
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Produit</th>
+        <th>Quantité</th>
+        <th>Unité</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for element in elements %}
+      <tr>
+        <td>{{ element.produit.designation }}</td>
+        <td>
+          <input type="number" name="quantite_{{ element.id }}" value="{{ element.quantite }}" min="1" class="form-control" />
+        </td>
+        <td>
+          <select name="unite_{{ element.id }}" class="form-select">
+            <option value="kg" {% if element.unite == 'kg' %}selected{% endif %}>Kg</option>
+            <option value="pièce" {% if element.unite == 'pièce' %}selected{% endif %}>Pièce</option>
+          </select>
+        </td>
+        <td>
+          <a href="{% url 'remove_from_quote' element.id %}" class="btn btn-danger btn-sm">❌</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="d-flex justify-content-between mt-3">
+    <div>
+      <a href="{% url 'produits_client' %}" class="btn btn-outline-secondary">⬅️ Retour au catalogue</a>
+      <a href="{% url 'cancel_quote' %}" class="btn btn-outline-danger ms-2">❌ Annuler la demande</a>
+    </div>
+    <button type="submit" class="btn btn-primary">📤 Envoyer la demande</button>
+  </div>
+</form>
+{% else %}
+<p class="text-muted">Votre demande de cotation est vide.</p>
+<div>
+  <a href="{% url 'produits_client' %}" class="btn btn-outline-secondary">⬅️ Retour au catalogue</a>
+</div>
+{% endif %}
+{% endblock %}

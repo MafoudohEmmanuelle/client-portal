@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Feuille de Devis</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #000;
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        h1 {
+            font-size: 18px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 14px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            padding: 6px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
+        .section-subtitle {
+            background-color: white;
+            font-weight: bold;
+            padding: 3px;
+            margin-top: 17px;
+            border: 1px solid #ccc;
+        }
+
+        .info-table, .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .info-table td {
+            padding: 6px;
+            vertical-align: top;
+        }
+
+        .data-table th, .data-table td {
+            padding: 6px;
+        }
+        .footer {
+            font-size: 10px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .table-container { 
+			display: flex; 
+			justify-content: space-between; 
+			margin: 20px; 
+		} 
+
+		.table { 
+			border-collapse: collapse; 
+			width: 45%; 
+			margin-right: 10px; 
+		} 
+
+		th, 
+		td { 
+			border: 1px solid #ddd; 
+			padding: 8px; 
+			text-align: left; 
+		} 
+        table, .section-title, .section-subtitle {
+            page-break-inside: avoid;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-row">
+        <img src="{{ logo_url }}" class="logo" alt="Logo">
+        <h1>Feuille de demande de devis</h1>
+        <div></div>
+    </div>
+
+    <div class="section-title">I - PARTIE RÉSERVÉE À LA DCM</div>
+    <table class="info-table">
+        <tr><td><i>Nom du client</i></td><td>{{ devis.client.nom_entreprise }}</td></tr>
+        <tr><td><i>Commercial en charge</i></td><td class="ans">{{ devis.client.commercial.nom_commercial }}</td></tr>
+        <tr><td><i>Désignation du produit</i></td><td class="ans">{{ devis.designation_produit }}</td></tr>
+        <tr><td><i>Famille de produit</i></td><td class="ans">{{ devis.famille_produit }}</td></tr>
+        <tr><td><i>Prévisions de consommation</i></td><td class="ans">{{ devis.quantite_previsionnelle }}{{ devis.unite }}/{{ devis.periode }}</td></tr>
+        <tr><td><i>Fiche technique disponible ?</i></td><td class="ans">{{ devis.fiche_technique|yesno:"Oui,Non" }}</td></tr>
+        <tr><td><i>Échantillon disponible ?</i></td><td class="ans">{{ devis.echantillon_disponible|yesno:"Oui,Non" }}</td></tr>
+        <tr><td><i>Visuel disponible ?</i></td><td class="ans">{{ devis.visuel_disponible|yesno:"Oui,Non" }}</td></tr>
+        <tr><td><i>Support identique à la fiche technique ?</i></td><td class="ans">{{ devis.devis_identique|yesno:"Oui,Non" }}</td></tr>
+        <tr><td><i>Le client paye les accessoires de production?</i></td><td class="ans">{{ devis.accessoires|yesno:"Oui,Non" }}</td></tr>
+    </table>
+
+    <div class="section-subtitle">INFOS SUPPORT</div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th><i>Nature du support</i></th>
+                <th><i>Couleur</i></th>
+                <th><i>Épaisseur</i></th>
+                <th><i>Grammage</i></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for support in supports%}
+            <tr>
+                <td class="ans">{{ support.nature_support }}</td>
+                <td class="ans">{{ support.couleur_support }}</td>
+                <td class="ans">{{ support.epaisseur_support }}</td>
+                <td class="ans">{{ support.grammage_support }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="table-container"> 
+		<table class="table"> 
+			<tr> 
+				<th><i>Quantité</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ devis.quantite_previsionnelle }}</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Unité</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ devis.unite }}</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Format à plat du produit fini</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ devis.longueur_produit }} x {{ devis.largeur_produit }} mm</td> 
+			</tr> 
+		</table> 
+
+	</div> 
+    <div class="section-subtitle"> INFOS FACONNAGE ; FINITIONS & CONDITIONNEMENT </div>
+    <div class="table-container"> 
+		<table class="table"> 
+			<tr> 
+				<th><i>Mode d'utilisation</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ devis.finition_conditionnement.mode_utilisation }}</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Mode de livraison</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ devis.finition_conditionnement.mode_livraison }}</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Emballage du Produit</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ devis.finition_conditionnement.conditionnement }}</td> 
+			</tr> 
+		</table> 
+	</div> 
+    <div class="table-container"> 
+        {% if devis.finition_conditionnement.mode_livraison|lower == "bobine" %}
+        <table class="table">
+          <thead><tr><th colspan="2">Paramètres bobine</th></tr></thead>
+          <tbody>
+            <tr><td>Nature mandrin</td><td>{{ devis.finition_conditionnement.nature_mandrin }}</td></tr>
+            <tr><td>Diamètre  mandrin</td><td>{{ devis.finition_conditionnement.diametre_mandrin }}</td></tr>
+            <tr><td>Épaisseur max mandrin</td><td>{{ devis.finition_conditionnement.epaisseur_mandrin }}mm</td></tr>
+            <tr><td>Poids max bobine</td><td>{{ devis.finition_conditionnement.poids_max_bobine }}kg</td></tr>
+            <tr><td>Sens de Déroulement</td><td>{{ devis.finition_conditionnement.sens_deroulement }}</td></tr>
+            <tr><td>Diamètre max bobine</td><td>{{ devis.finition_conditionnement.diametre_bobine }}</td></tr>
+            <tr><td>Nb pièces / bobine</td><td>{{ devis.finition_conditionnement.nb_pieces }}</td></tr>
+            <tr><td>Nb bobines / palette</td><td>{{ devis.finition_conditionnement.nb_bobines_par_palette }}</td></tr>
+            {% if devis.finition_conditionnement.autocolant_utilise == "True" %}
+              <p> Utilisation d'autocollant? {{ devis.finition_conditionnement.autocolant_utilise|yesno:"Oui,Non" }} </p>
+              <tr><td>Espacement autocollants (min)</td><td>{{ devis.finition_conditionnement.espacement_min }}</td></tr>
+              <tr><td>Espacement autocollants (max)</td><td>{{ devis.finition_conditionnement.espacement_max }}</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+        {% endif %}
+		<table class="table"> 
+			<tr>
+                {% if devis.finition_conditionnement.mode_livraison|lower == "bobine"%}
+                <td>Nombre de pièces / {{ devis.finition_conditionnement.mode_livraison}}= {{devis.finition_conditionnement.nombre_piece}}</td>
+                <td>Nombre de bobine / {{ devis.finition_conditionnement.contenance_livraison}}= {{devis.finition_conditionnement.nombre_bobine_palette}}</td>
+                {% else %}
+                <td>Nombre de pièces / {{ devis.finition_conditionnement.contenance_livraison}}= {{devis.finition_conditionnement.nombre_pieces}}</td>
+                {% endif %}
+             </tr>      
+		</table> 
+	</div> 
+    <div class="section-title">II- PARTIE RESERVEE AU BUREAU D'ETUDES  </div>
+    <div class="table-container"> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Type d'impression</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ analyse.type_impression }}</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Sens d'impression</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ analyse.sens_impression }}</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Type d'encre</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ analyse.type_encre }}</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Colle Complexage</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ analyse.colle_complexage }}</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Plastification</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ analyse.plastification }}</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Découpe</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ analyse.decoupe }}</td> 
+			</tr> 
+		</table> 
+	</div>
+    <div class="table-container"> 
+		<table class="table"> 
+			<tr> 
+				<th><i>Couleurs ou Vernis</i></th> 
+			</tr> 
+            {% for c in colorations %}
+            <tr> 
+				<td class="ans">{{ c.couleur }}</td> 
+			</tr> 
+            {% endfor %}
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Couleurs ou Vernis</i></th> 
+			</tr> 
+            {% for c in colorations %}
+            <tr> 
+				<td class="ans">{{ c.couleur }}</td> 
+			</tr> 
+            {% endfor %}
+		</table> 
+        <table class="table"> 
+            <tr> 
+				<th><i>Outillage</i></th> 
+                <th><i>Quantités</i></th> 
+                <th><i>P.U (fcfa)</i></th> 
+			</tr> 
+			{% for o in outillages %}
+                <tr> 
+                    <td class="ans">{{ o.get_type_outillage_display }}</td> 
+                    <td class="ans">{{ o.quantite }}</td> 
+                    <td class="ans">{{ o.prix_unitaire }}</td> 
+                </tr> 
+           {% endfor %}
+		</table> 
+	</div> 
+    <div class="table-container"> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Format à plat du produit fini</i></th> 
+			</tr> 
+			<tr> 
+				<td class="ans">{{ devis.longueur_produit }} x {{ devis.largeur_produit }} mm</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Format support (Laize x l)</i></th> 
+			</tr> 
+            <tr> 
+				<td class="ans">{{ analyse.format_support_longueur}} x {{ analyse.format_support_largeur}} mm</td> 
+			</tr> 
+		</table> 
+        <table class="table"> 
+			<tr> 
+				<th><i>Cotation à l'unité</i></th> 
+                <th><i>Quantité</i></th> 
+                <th><i>Taux mat 1ères</i></th> 
+			</tr> 
+			<tr> 
+				<tr> 
+                    <td class="ans">{{ cotation.cotation_unitaire }}</td> 
+                    <td class="ans">{{ cotation.quantita }}</td> 
+                    <td class="ans">{{ cotation.taux_mat  }}</td> 
+                </tr> 
+			</tr> 
+		</table> 
+	</div>  
+</body>
+</html>

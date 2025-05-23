@@ -1,0 +1,40 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Documents par Commande{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Documents classés par commande</h2>
+
+{% for bloc in commandes_avec_docs %}
+  <div class="card mb-4">
+    <div class="card-header">
+      <strong>Commande #{{ bloc.commande.id_commande }}</strong> — Créée le {{ bloc.commande.date_creation|date:"d/m/Y" }}
+    </div>
+    <ul class="list-group list-group-flush">
+      {% for doc in bloc.documents %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            {{ doc.get_type_documents_display }} 
+            {% if doc.peut_etre_signer and not doc.signe_par %}
+              <span class="badge bg-warning text-dark ms-2">À signer</span>
+            {% endif %}
+            {% if doc.lu %}
+              <span class="badge bg-success ms-2">Lu</span>
+            {% else %}
+              <span class="badge bg-secondary ms-2">Non lu</span>
+            {% endif %}
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <a href="{{ doc.fichier.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Voir</a>
+            
+            
+          </div>
+        </li>
+      {% empty %}
+        <li class="list-group-item text-muted">Aucun document pour cette commande.</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% empty %}
+  <p class="text-muted">Aucune commande trouvée.</p>
+{% endfor %}
+{% endblock %}

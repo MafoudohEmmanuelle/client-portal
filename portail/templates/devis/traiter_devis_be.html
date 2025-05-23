@@ -1,0 +1,185 @@
+{% extends "dashboard/base.html" %}
+{% block title %} Devis{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">✏️ Traitement du Devis N°{{ devis.id }}</h2>
+
+<div class="container my-5">
+
+  <!-- Statut -->
+  <div class="mb-3">
+    <span class="badge bg-info text-dark">Statut : {{ devis.get_statut_display }}</span>
+    <small class="text-muted">Dernière mise à jour : {{ devis.update_date|date:"d/m/Y H:i" }}</small>
+  </div>
+
+  <!-- Détails du devis -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">📄 Détail du Devis</div>
+    <div class="card-body">
+      <table class="table table-bordered">
+        <tbody>
+          <tr><td>Nom du client</td><td>{{ devis.client.nom_entreprise }}</td></tr>
+          <tr><td>Commercial en charge</td><td>{{ devis.client.commercial.nom_commercial }}</td></tr>
+          <tr><td>Désignation du produit</td><td>{{ devis.designation_produit }}</td></tr>
+          <tr><td>Famille de produit</td><td>{{ devis.famille_produit }}</td></tr>
+          <tr><td>Prévisions de consommation</td><td>{{ devis.quantite_previsionnelle }}{{ devis.unite }}/{{ devis.periode }}</td></tr>
+          <tr><td>Fiche technique disponible ?</td><td>{{ devis.fiche_technique|yesno:"Oui,Non" }}</td></tr>
+          <tr><td>Échantillon disponible ?</td><td>{{ devis.echantillon_disponible|yesno:"Oui,Non" }}</td></tr>
+          <tr><td>Visuel disponible ?</td><td>{{ devis.visuel_disponible|yesno:"Oui,Non" }}</td></tr>
+          <tr><td>Support identique à la fiche technique ?</td><td>{{ devis.devis_identique|yesno:"Oui,Non" }}</td></tr>
+          <tr><td>Le client paye les accessoires ?</td><td>{{ devis.accessoires|yesno:"Oui,Non" }}</td></tr>
+        </tbody>
+      </table>
+      <!--Support-->
+      <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nature du support</th>
+                <th>Couleur</th>
+                <th>Épaisseur</th>
+                <th>Grammage</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for support in supports %}
+            <tr>
+                <td>{{ support.nature_support }}</td>
+                <td>{{ support.couleur_support }}</td>
+                <td>{{ support.epaisseur_support }}</td>
+                <td>{{ support.grammage_support }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+      <!-- Format et conditionnements -->
+      <div class="row">
+        <div class="col-md-6">
+          <table class="table table-bordered">
+            <tr><th>Format à plat (mm):</th><td>{{ devis.longueur_produit }} x {{ devis.largeur_produit }} mm</td></tr>
+            <tr><th>Mode d'utilisation:</th><td>{{ devis.finition_conditionnement.mode_utilisation }}</td></tr>
+            <tr><th>Emballage:</th><td>{{ devis.finition_conditionnement.conditionnement }}</td></tr>
+            <tr><th>Mode de livraison:</th><td>{{ devis.finition_conditionnement.mode_livraison }}</td></tr>
+          </table>
+        </div>
+        <div class="col-md-6">
+          {% if devis.finition_conditionnement.mode_livraison|lower == "bobine" %}
+          <table class="table table-bordered">
+            <thead><tr><th colspan="2">Paramètres bobine</th></tr></thead>
+            <tbody>
+              <tr><td>Nature mandrin</td><td>{{ devis.finition_conditionnement.nature_mandrin }}</td></tr>
+              <tr><td>Diamètre  mandrin</td><td>{{ devis.finition_conditionnement.diametre_mandrin }}</td></tr>
+              <tr><td>Épaisseur max mandrin</td><td>{{ devis.finition_conditionnement.epaisseur_mandrin }}mm</td></tr>
+              <tr><td>Poids max bobine</td><td>{{ devis.finition_conditionnement.poids_max_bobine }}kg</td></tr>
+              <tr><td>Sens de Déroulement</td><td>{{ devis.finition_conditionnement.sens_deroulement }}</td></tr>
+              <tr><td>Diamètre max bobine</td><td>{{ devis.finition_conditionnement.diametre_bobine }}</td></tr>
+              <tr><td>Nb pièces / bobine</td><td>{{ devis.finition_conditionnement.nb_pieces }}</td></tr>
+              <tr><td>Nb bobines / palette</td><td>{{ devis.finition_conditionnement.nb_bobines_par_palette }}</td></tr>
+              {% if devis.finition_conditionnement.autocolant_utilise == "True" %}
+                <p> Utilisation d'autocollant? {{ devis.finition_conditionnement.autocolant_utilise|yesno:"Oui,Non" }} </p>
+                <tr><td>Espacement autocollants (min)</td><td>{{ devis.finition_conditionnement.espacement_min }}</td></tr>
+                <tr><td>Espacement autocollants (max)</td><td>{{ devis.finition_conditionnement.espacement_max }}</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white">🧾 Informations Techniques à remplir</div>
+    <div class="card-body">
+      {% if support_formset.errors %}
+        <div class="alert alert-danger">Erreur dans le formulaire. Merci de vérifier les champs.</div>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <div class="row">
+          <!-- Formsets à gauche -->
+          <div class="col-md-6">
+            <h5>🎨 Colorations</h5>
+            <div id="coloration-formset">
+              {{ coloration_formset.management_form }}
+              {% for form in coloration_formset %}
+                <div class="formset coloration-form border p-2 rounded mb-2">
+                  {{ form.couleur.label_tag }} {{ form.couleur }}
+                </div>
+              {% endfor %}
+            </div>
+            <button type="button" id="add-coloration" class="btn btn-sm btn-dark mb-3">+ Ajouter une couleur</button>
+  
+            <h5>🛠️ Outillages</h5>
+            <div id="outillage-formset">
+              {{ outillage_formset.management_form }}
+              {% for form in outillage_formset %}
+                <div class="formset outillage-form border p-2 rounded mb-2">
+                  {{ form.type_outillage.label_tag }} {{ form.type_outillage }}
+                  {{ form.quantite.label_tag }} {{ form.quantite }}
+                  {{ form.prix_unitaire.label_tag }} {{ form.prix_unitaire }}
+                </div>
+              {% endfor %}
+            </div>
+            <button type="button" id="add-outillage" class="btn btn-sm btn-dark mb-3">+ Ajouter un outillage</button>
+  
+            <h5>💰 Cotation</h5>
+            <div id="cotation-formset">
+              {{ cotation_formset.management_form }}
+              {% for form in cotation_formset %}
+                <div class="formset cotation-form border p-2 rounded mb-2">
+                  {{ form.cotation_unitaire.label_tag }} {{ form.cotation_unitaire }}
+                  {{ form.quantite.label_tag }} {{ form.quantite }}
+                  {{ form.taux_mat.label_tag }} {{ form.taux_mat }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+  
+          <!-- Formulaire Analyse à droite -->
+          <div class="col-md-6">
+            <h5>📊 Analyse Technique</h5>
+            <div class="border p-3 rounded">
+              {{ form.as_p }}
+            </div>
+          </div>
+        </div>
+  
+        <div class="mt-4">
+          <button type="submit" name="retour" class="btn btn-secondary">Retour</button>
+          <button type="submit" name="soumettre" class="btn btn-success">Soumettre au commercial</button>
+        </div>
+      </form>
+    </div>
+  </div>
+<script>
+  function cloneForm(prefix) {
+    const formsetDiv = document.getElementById(`${prefix}-formset`);
+    const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+    const currentCount = parseInt(totalForms.value);
+  
+    // Trouve le dernier form existant à cloner
+    const formToClone = formsetDiv.querySelector('.formset');
+    if (!formToClone) return;
+  
+    // Clone proprement
+    const newForm = formToClone.cloneNode(true);
+  
+    // Nettoie les champs du formulaire cloné
+    newForm.querySelectorAll('input, select, textarea').forEach((field) => {
+      field.name = field.name.replace(`${prefix}-0-`, `${prefix}-${currentCount}-`);
+      field.id = field.id.replace(`${prefix}-0-`, `${prefix}-${currentCount}-`);
+      field.value = '';
+    });
+  
+    formsetDiv.appendChild(newForm);
+    totalForms.value = currentCount + 1;
+  }
+  
+  // EventListeners
+  document.getElementById('add-coloration').addEventListener('click', function() {
+    cloneForm('coloration');
+  });
+  document.getElementById('add-outillage').addEventListener('click', function() {
+    cloneForm('outillage');
+  });
+  </script>
+{% endblock%}

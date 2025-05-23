@@ -1,0 +1,41 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Offres{% endblock %}
+
+{% block content %}
+  <h2>Offres pour le devis <strong>{{ devis.nom_produit }}</strong></h2>
+
+  {% if offres %}
+    {% for offre in offres %}
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ offre.date_sent|date:"d/m/Y H:i" }}</h5>
+          <p><strong>Prix :</strong> {{ offre.prix }} FCFA</p>
+          <p><strong>Description produit :</strong> {{ offre.description_produit }}</p>
+          <p><strong>Description offre :</strong> {{ offre.description_offre }}</p>
+          
+          <p>
+            <span class="badge 
+              {% if offre.status == 'accepted' %}bg-success
+              {% elif offre.status == 'refused' %}bg-danger
+              {% else %}bg-warning text-dark
+              {% endif %}
+            ">
+              {{ offre.get_status_display }}
+            </span>
+          </p>
+
+          {% if offre.status == 'refused' and offre.commentaire_refus %}
+            <p><strong>💬 Commentaire du client :</strong> {{ offre.commentaire_refus }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="alert alert-info">Aucune offre trouvée.</div>
+  {% endif %}
+
+  <div class="d-flex justify-content-between mt-4">
+    <a href="{% url 'devis_complet' %}" class="btn btn-secondary">← Retour</a>
+    <a href="{% url 'creer_proforma' devis.id %}" class="btn btn-primary">➕ Créer une nouvelle offre</a>
+  </div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Tableau de bord Commercial{% endblock %}
+
+{% block content %}
+  <h2>Liste des Clients</h2>
+  <div class="container py-5">
+    {% if leads %}
+        <table class="table table-striped table-bordered bg-white">
+            <thead class="table-dark">
+                <tr>
+                    <th>Prospect</th>
+                    <th>Interlocuteur</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Localisation</th>
+                    <th>Spécialité de l'entreprise</th>
+                    <th>Date d'inscription</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in leads %}
+                    <tr>
+                        <td>{{ lead.raison_sociale}}</td>
+                        <td>{{ lead.interlocuteur }}</td>
+                        <td>{{ lead.email }}</td>
+                        <td>{{ lead.telephone}}</td>
+                        <td>{{ lead.pays }},{{ lead.ville }},{{ lead.rue }}</td>
+                        <td>{{ lead.secteur_activite}}</td>
+                        <td>{{ lead.date_reception|date:"d/m/Y" }}</td>
+                        <td>
+                            <a href="{% url 'lead_validation' lead.id %}" class="btn btn-sm btn-primary">Valider</a>
+                            <a href="{% url 'refuser_lead' lead.id %}" class="btn btn-sm btn-outline-secondary">Refuser</a>    
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">Aucun prospect trouvé pour le moment.</div>
+    {% endif %}
+    <div class="d-flex gap-2">
+        <a href="{% url 'chef_dashboard' %}" class="btn btn-secondary">↩️ Retour</a>
+    </div>   
+</div>
+{% endblock %}

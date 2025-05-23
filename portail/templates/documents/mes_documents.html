@@ -1,0 +1,65 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}📁 Documents par Commande{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">📦 Documents classés par commande</h2>
+
+{% for bloc in page_obj %}
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between">
+      <strong>Commande #{{ bloc.commande.id }}</strong>
+      <span>📅 {{ bloc.commande.date_creation|date:"d/m/Y" }}</span>
+    </div>
+    <ul class="list-group list-group-flush">
+      {% if bloc.uploaded_documents %}
+        <li class="list-group-item bg-light"><strong>📄 Documents téléversés :</strong></li>
+        {% for doc in bloc.uploaded_documents %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              {{ doc.get_type_documents_display }} ({{ doc.date_upload|date:"d/m/Y" }})
+              {% if doc.peut_etre_signer and not doc.signe_par %}
+                <span class="badge bg-warning text-dark ms-2">À signer</span>
+              {% endif %}
+            </div>
+            <a href="{{ doc.fichier.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Voir</a>
+          </li>
+        {% endfor %}
+      {% endif %}
+
+      {% if bloc.proformas %}
+        <li class="list-group-item bg-light"><strong>📤 Proformas générés :</strong></li>
+        {% for doc in bloc.proformas %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Proforma - {{ doc.date_creation|date:"d/m/Y H:i" }}
+            <a href="{{ doc.doc.url }}" target="_blank" class="btn btn-sm btn-outline-primary">Voir</a>
+          </li>
+        {% endfor %}
+      {% endif %}
+
+      {% if not bloc.uploaded_documents and not bloc.proformas %}
+        <li class="list-group-item text-muted">Aucun document pour cette commande.</li>
+      {% endif %}
+    </ul>
+  </div>
+{% endfor %}
+<nav aria-label="Pagination">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+      </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+<div class="d-flex justify-content-between mt-4">
+  <a href="{% url 'client_dashboard' %}" class="btn btn-secondary">← Retour</a>
+</div>
+{% endblock %}

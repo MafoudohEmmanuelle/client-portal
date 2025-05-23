@@ -1,0 +1,31 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Mes Proformas Acceptées{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">📜 Proformas Acceptées</h2>
+
+<div class="row">
+  {% for proforma in proformas %}
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Proforma #{{ proforma.id }}</h5>
+        <p><strong>Date :</strong> {{ proforma.date_envoie|date:"d/m/Y" }}</p>
+        <p><strong>Total HT :</strong> {{ proforma.montant_total_ht }} FCFA</p>
+        <p><strong>Net à Payer :</strong> {{ proforma.net_a_payer }} FCFA</p>
+
+        {% if proforma.generated_doc %}
+        <a href="{{ proforma.generated_doc.doc.url }}" target="_blank" class="btn btn-sm btn-outline-primary">📄 Voir PDF</a>
+        {% endif %}
+
+        <a href="{% url 'passer_commande_depuis_proforma' proforma.id %}" class="btn btn-sm btn-success mt-2">
+          📦 Passer une commande
+        </a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p>Aucune proforma acceptée pour le moment.</p>
+  {% endfor %}
+</div>
+{% endblock %}

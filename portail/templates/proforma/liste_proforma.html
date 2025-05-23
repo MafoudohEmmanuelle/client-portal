@@ -1,0 +1,66 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Proforma{% endblock %}
+
+{% block content %}
+  <h2>Proforma pour le devis <strong>{{ devis.designation_produit }}</strong></h2>
+
+  {% if offres %}
+    {% for offre in offres %}
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ offre.date_envoie|date:"d/m/Y H:i" }}</h5>
+          <p><strong>Net à payer :</strong> {{ offre.net_a_payer }} FCFA</p>
+          <p><strong>Modalité de paiement:</strong> {{ offre.modalites_reglement }}</p>
+          <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Désignation</th>
+                    <th>Quantité</th>
+                    <th>Unité</th>
+                    <th>Prix unitaire</th>
+                    <th>Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in item_list %}
+                <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ item.designation }}</td>
+                  <td>{{ item.quantite }}</td>
+                  <td>{{ item.unite }}</td>
+                  <td>{{ item.prix_unitaire|floatformat:0 }}</td>
+                  <td>{{ item.montant|floatformat:0 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+          
+          <p>
+            <span class="badge 
+              {% if offre.statut == 'acceptee' %}bg-success
+              {% elif offre.statut == 'refusee' %}bg-danger
+              {% elif offre.statut == 'valide' %}bg-info
+              {% elif offre.statut == 'non_vlaide' %}bg-warning
+              {% else %}bg-warning text-dark
+              {% endif %}
+            ">
+              {{ offre.get_statut_display }}
+            </span>
+          </p>
+
+          {% if offre.status == 'refused' and offre.commentaire_refus %}
+            <p><strong>💬 Commentaire du client :</strong> {{ offre.commentaire_refus }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="alert alert-info">Aucune offre trouvée.</div>
+  {% endif %}
+
+  <div class="d-flex justify-content-between mt-4">
+    <a href="{% url 'liste_devis_et_quotes' %}" class="btn btn-secondary">← Retour</a>
+    <a href="{% url 'creer_proforma' devis.pk %}" class="btn btn-primary">➕ Créer une nouvelle offre</a>
+  </div>
+{% endblock %}

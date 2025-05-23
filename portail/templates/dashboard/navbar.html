@@ -1,0 +1,47 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+  <div class="container-fluid">
+    <div class="d-flex w-100 justify-content-between align-items-center">
+
+      <!-- Centered Search Bar -->
+      <form class="d-flex w-50 mx-auto" role="search">
+        <input class="form-control me-2 search-bar" type="search" placeholder="Rechercher" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit"> Rechercher </button>
+      </form>
+
+      <!-- Right side of navbar -->
+      <div class="d-flex align-items-center">
+        <!-- Notifications -->
+        <a href="#" class="me-4 position-relative text-dark">
+          <i class="bi bi-bell fs-4"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            2
+          </span>
+        </a>
+
+        <!-- Profile -->
+        {% if request.user.is_authenticated and request.user.client.photo_profil %}
+          <a href="{% url 'profile_view' %}" class="me-4">
+            <img src="{{ request.user.client.photo_profil.url }}" alt="Profil" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;">
+          </a>
+        {% else %}
+          <a href="{% url 'profile_view' %}" class="me-4 text-dark">
+            <i class="bi bi-person-circle fs-4"></i>
+          </a>
+        {% endif %}
+        <!-- Logout -->
+        <a href="{% url 'logout' %}" class="text-danger">
+          <i class="bi bi-box-arrow-right fs-4"></i>
+        </a>
+
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .search-bar {
+    max-width: 600px; /* Makes the search bar a bit longer */
+    width: 100%; /* Ensures the search bar takes up the full width within its container */
+    padding-left: 20px; /* Adds some padding to the left for a more comfortable look */
+  }
+</style>

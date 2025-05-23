@@ -1,0 +1,14 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<h2>📁Devis générés</h2>
+<ul class="list-group">
+  {% for doc in devis_gen %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      Devis - {{ doc.date_creation|date:"d/m/Y H:i" }}
+      <a href="{{ doc.doc.url }}" class="btn btn-sm btn-outline-primary" target="_blank">Voir</a>
+    </li>
+  {% empty %}
+    <li class="list-group-item">Aucun devis généré.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

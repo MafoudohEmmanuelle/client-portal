@@ -1,0 +1,34 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Tableau de bord CMC{% endblock %}
+
+{% block content %}
+  <h2>Liste des Commerciaux</h2>
+  <div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'commercial_register' %}" class="btn btn-primary">Ajouter un Commercial</a>
+    </div>
+
+    {% if commercial %}
+        <table class="table table-striped table-bordered bg-white">
+            <thead class="table-dark">
+                <tr>
+                    <th>Commercial</th>
+                    <th>Contact</th>
+                    <th>Nombre de client</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for com in commerecial %}
+                    <tr>
+                        <td>{{ com.nom_commercial}}</td>
+                        <td>{{ com.contact}}</td>
+                        <td>{{  }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">Aucun commercial trouvé pour le moment.</div>
+    {% endif %}
+</div>
+{% endblock %}

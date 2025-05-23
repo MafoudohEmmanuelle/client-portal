@@ -1,0 +1,53 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Tableau de bord CMC{% endblock %}
+
+{% block content %}
+  <h2>Bienvenue, {{ user.username }} </h2>
+  <p>Voici un aperçu de vos activités commerciales.</p>
+
+  <div class="row g-4">
+    <div class="col-md-2">
+      <a href="{% url 'liste_client_cmc' %}" class="text-decoration-none">
+        <div class="card card-custom text-center p-3">
+          <i class="bi bi-people fs-2 text-primary mb-2"></i>
+          <h6>Clients</h6>
+          <p class="fs-4 fw-bold text-primary">{{ clients_count }}</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-2">
+      <a href="{% url 'liste_lead' %}" class="text-decoration-none">
+        <div class="card card-custom text-center p-3">
+          <i class="bi bi-people fs-2 text-dark mb-2"></i>
+          <h6>Prospect à valider</h6>
+          <p class="fs-4 fw-bold text-dark">{{ leads_count }}</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-2">
+      <a href="{% url 'list_proforma' %}" class="text-decoration-none"> 
+        <div class="card card-custom text-center p-3">
+          <i class="bi bi-file-earmark-text fs-2 text-success mb-2"></i>
+          <h6>Proforma à Valider</h6>
+          <p class="fs-4 fw-bold text-success">{{ new_proforma }}</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-2">
+      <a href="#" class="text-decoration-none">
+        <div class="card card-custom text-center p-3">
+          <i class="bi bi-cart-check fs-2 text-info mb-2"></i>
+          <h6>Nouvelles commandes</h6>
+          <p class="fs-4 fw-bold text-info">{{ new_orders_count }}</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-2">
+      <div class="card card-custom text-center p-3">
+        <i class="bi bi-box-seam fs-2 text-danger mb-2"></i>
+        <h6>Commandes Payées</h6>
+        <p class="fs-4 fw-bold text-danger"></p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

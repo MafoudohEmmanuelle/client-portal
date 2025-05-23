@@ -1,0 +1,42 @@
+{% extends "dashboard/base.html" %}
+{% block title %} Devis{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">📄 Devis</h2>
+
+{% if quotes %}
+<table class="table table-bordered bg-white shadow-sm">
+  <thead class="table-light">
+    <tr>
+      <th>#</th>
+      <th>Client</th>
+      <th>Date de soumission</th>
+      <th>Statut</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for quote in quotes %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ quote.client.nom_entreprise}}</td>
+      <td>{{ quote.date_creation|date:"d/m/Y" }}</td>
+      <td><span class="badge bg-primary">{{ quote.get_statut_display }}</span></td>
+      <td>
+        <a href="{% url 'detail_quote' quote.id %}" class="btn btn-sm btn-success">✏️ Traiter</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="6" class="text-center">Aucun demande de cotation en attente</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <div class="alert alert-info mt-4">Aucune demande de cotation à afficher.</div>
+{% endif %}
+<div class="d-flex gap-2">
+  <a href="{% url 'commercial_dashboard' %}" class="btn btn-secondary">↩️ Retour</a>
+</div>
+{% endblock %}

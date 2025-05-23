@@ -1,0 +1,71 @@
+{% extends "dashboard/base.html" %}
+{% block title %}📑 Offres liées à la demande de cotation{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">📑 Offres pour la demande de cotation du {{ quote.date_creation|date:"d/m/Y" }}</h2>
+<p><strong>Client :</strong> {{ quote.client.nom_entreprise }}</p>
+
+{% if proformas %}
+  {% for proforma in proformas %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Offre #{{ proforma.id }} — {{ proforma.date_envoie|date:"d/m/Y H:i" }}</h5>
+        <p><strong>Net à payer :</strong> {{ proforma.net_a_payer|floatformat:0 }} FCFA</p>
+        <p><strong>Modalités de règlement :</strong> {{ proforma.modalites_reglement }}</p>
+
+        <table class="table table-sm table-bordered mt-3">
+          <thead class="table-light">
+            <tr>
+              <th>Désignation</th>
+              <th>Quantité</th>
+              <th>Unité</th>
+              <th>Prix unitaire</th>
+              <th>Montant</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in proforma.items.all %}
+              <tr>
+                <td>{{ item.designation }}</td>
+                <td>{{ item.quantite }}</td>
+                <td>{{ item.unite }}</td>
+                <td>{{ item.prix_unitaire|floatformat:0 }} FCFA</td>
+                <td>{{ item.montant|floatformat:0 }} FCFA</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <p>
+          <span class="badge 
+            {% if proforma.statut == 'acceptee' %}bg-success
+            {% elif proforma.statut == 'refusee' %}bg-danger
+            {% elif proforma.statut == 'valide' %}bg-info
+            {% elif proforma.statut == 'non_valide' %}bg-warning text-dark
+            {% else %}bg-secondary
+            {% endif %}
+          ">
+            Statut : {{ proforma.get_statut_display }}
+          </span>
+        </p>
+
+        {% if proforma.commentaire_refus %}
+          <p class="text-danger"><strong>💬 Commentaire du refus :</strong> {{ proforma.commentaire_refus }}</p>
+        {% endif %}
+
+        {% if proforma.generated_doc %}
+          <a href="{{ proforma.generated_doc.doc.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+            📄 Voir PDF
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="alert alert-info">Aucune offre trouvée pour cette demande de cotation.</div>
+{% endif %}
+<div class="d-flex justify-content-between mt-4">
+    <a href="{% url 'liste_devis_et_quotes' %}" class="btn btn-secondary mt-3">← Retour à la liste</a>
+    <a href="{% url 'creer_proforma_old' quote.pk %}" class="btn btn-primary">➕ Créer une nouvelle offre</a>
+</div>
+{% endblock %}

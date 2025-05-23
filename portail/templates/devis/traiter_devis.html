@@ -1,0 +1,125 @@
+{% extends "dashboard/base.html" %}
+{% block title %} Devis{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">✏️ Traitement du Devis N°{{ devis.id }}</h2>
+
+<div class="container my-5">
+
+  <!-- Statut -->
+  <div class="mb-3">
+    <span class="badge bg-info text-dark">Statut : {{ devis.get_statut_display }}</span>
+    <small class="text-muted">Dernière mise à jour : {{ devis.update_date|date:"d/m/Y H:i" }}</small>
+  </div>
+
+  <!-- Détails du devis -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">📄 Détail du Devis</div>
+    <div class="card-body">
+      <table class="table table-bordered">
+        <tbody>
+          <tr><td>Nom du client</td><td>{{ devis.client.nom_entreprise }}</td></tr>
+          <tr><td>Commercial en charge</td><td>{{ devis.client.commercial.nom_commercial }}</td></tr>
+          <tr><td>Désignation du produit</td><td>{{ devis.designation_produit }}</td></tr>
+          <tr><td>Famille de produit</td><td>{{ devis.famille_produit }}</td></tr>
+          <tr><td>Prévisions de consommation</td><td>{{ devis.quantite_previsionnelle }}{{ devis.unite }}/{{ devis.periode }}</td></tr>
+          <tr><td>Fiche technique disponible ?</td><td>{{ devis.fiche_technique|yesno:"Oui,Non" }}</td></tr>
+          <tr><td>Échantillon disponible ?</td><td>{{ devis.echantillon_disponible|yesno:"Oui,Non" }}</td></tr>
+          <tr><td>Visuel disponible ?</td><td>{{ devis.visuel_disponible|yesno:"Oui,Non" }}</td></tr>
+          <tr><td>Support identique à la fiche technique ?</td><td>{{ devis.devis_identique|yesno:"Oui,Non" }}</td></tr>
+          <tr><td>Le client paye les accessoires ?</td><td>{{ devis.accessoires|yesno:"Oui,Non" }}</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Format et conditionnements -->
+      <div class="row">
+        <div class="col-md-6">
+          <table class="table table-bordered">
+            <tr><th>Format à plat (mm):</th><td>{{ devis.longueur_produit }} x {{ devis.largeur_produit }} mm</td></tr>
+            <tr><th>Mode d'utilisation:</th><td>{{ devis.finition_conditionnement.mode_utilisation }}</td></tr>
+            <tr><th>Emballage:</th><td>{{ devis.finition_conditionnement.conditionnement }}</td></tr>
+            <tr><th>Mode de livraison:</th><td>{{ devis.finition_conditionnement.mode_livraison }}</td></tr>
+          </table>
+        </div>
+        <div class="col-md-6">
+          {% if devis.finition_conditionnement.mode_livraison|lower == "bobine" %}
+          <table class="table table-bordered">
+            <thead><tr><th colspan="2">Paramètres bobine</th></tr></thead>
+            <tbody>
+              <tr><td>Nature mandrin</td><td>{{ devis.finition_conditionnement.nature_mandrin }}</td></tr>
+              <tr><td>Diamètre  mandrin</td><td>{{ devis.finition_conditionnement.diametre_mandrin }}</td></tr>
+              <tr><td>Épaisseur max mandrin</td><td>{{ devis.finition_conditionnement.epaisseur_mandrin }}mm</td></tr>
+              <tr><td>Poids max bobine</td><td>{{ devis.finition_conditionnement.poids_max_bobine }}kg</td></tr>
+              <tr><td>Sens de Déroulement</td><td>{{ devis.finition_conditionnement.sens_deroulement }}</td></tr>
+              <tr><td>Diamètre max bobine</td><td>{{ devis.finition_conditionnement.diametre_bobine }}</td></tr>
+              <tr><td>Nb pièces / bobine</td><td>{{ devis.finition_conditionnement.nb_pieces }}</td></tr>
+              <tr><td>Nb bobines / palette</td><td>{{ devis.finition_conditionnement.nb_bobines_par_palette }}</td></tr>
+              {% if devis.finition_conditionnement.autocolant_utilise == "True" %}
+                <p> Utilisation d'autocollant? {{ devis.finition_conditionnement.autocolant_utilise|yesno:"Oui,Non" }} </p>
+                <tr><td>Espacement autocollants (min)</td><td>{{ devis.finition_conditionnement.espacement_min }}</td></tr>
+                <tr><td>Espacement autocollants (max)</td><td>{{ devis.finition_conditionnement.espacement_max }}</td></tr>
+              {% endif %}
+            </tbody>
+          </table>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire des supports -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white">🧾 Informations Techniques à remplir</div>
+    <div class="card-body">
+      {% if support_formset.errors %}
+      <div class="alert alert-danger">Erreur dans le formulaire. Merci de vérifier les champs.</div>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        {{ support_formset.management_form }}
+        {% for form in support_formset %}
+        <div class="row mb-3 border rounded p-2">
+          <div class="col-md-3">
+            {{ form.type_support.label_tag }} {{ form.type_support }}
+          </div>
+          <div class="col-md-2">
+            {{ form.couleur.label_tag }} {{ form.couleur }}
+          </div>
+          <div class="col-md-2">
+            {{ form.epaisseur.label_tag }} {{ form.epaisseur }}
+          </div>
+          <div class="col-md-2">
+            {{ form.grammage.label_tag }} {{ form.grammage }}
+          </div>
+          <div class="col-md-2">
+            <button type="button" id="add-form" class="btn btn-dark">+ Ajouter un support</button>
+          </div>
+        </div>
+        {% endfor %}
+        <div class="mt-4 d-flex gap-2">
+          <button type="submit" class="btn btn-warning" name="action" value="modifier">🛠 Modifier le devis</button>
+          <button type="submit" class="btn btn-secondary" name="action" value="retour">↩️ Retour</button>
+          <button type="submit" class="btn btn-success" name="action" value="soumettre">📤 Soumettre au BE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  const formContainer = $('#form-container');
+  const addButton = $('#add-form');
+  let totalForms = $('#id_form-TOTAL_FORMS');
+
+  addButton.on('click', function () {
+    const formCount = parseInt(totalForms.val());
+    const emptyFormHtml = $('#empty-form').html(); // Only form fields inside
+
+    const newFormHtml = emptyFormHtml.replace(/__prefix__/g, formCount);
+    const newFormDiv = $('<div class="support-form border p-2 my-2"></div>').html(newFormHtml);
+
+    formContainer.append(newFormDiv);
+    totalForms.val(formCount + 1);
+  });
+</script>
+{% endblock %}

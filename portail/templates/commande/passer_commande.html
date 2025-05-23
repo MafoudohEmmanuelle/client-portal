@@ -1,0 +1,26 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Passer une commande{% endblock %}
+
+{% block content %}
+<h2>📦 Passer une commande pour Proforma #{{ proforma.id }}</h2>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5>Détails de livraison</h5>
+      {{ commande_form.as_p }}
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5>Bon de commande (PDF)</h5>
+      {{ bon_form.as_p }}
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-success">📨 Envoyer la commande</button>
+  <a href="{% url 'proformas_acceptees' %}" class="btn btn-secondary">Retour</a>
+</form>
+{% endblock %}

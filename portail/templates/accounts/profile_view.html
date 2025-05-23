@@ -1,0 +1,15 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Mon Profil</h2>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+  </form>
+  <div class="d-flex gap-2">
+    <a href="{% url 'client_dashboard' %}" class="btn btn-secondary">↩️ Retour</a>
+  </div>  
+</div>
+{% endblock %}

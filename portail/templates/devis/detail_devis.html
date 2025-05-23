@@ -1,0 +1,44 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Détail du Devis{% endblock %}
+
+{% block content %}
+<h2>📄 Détail du devis #{{ devis.id }}</h2>
+
+<p><strong>Client :</strong> {{ devis.client.nom_entreprise }}</p>
+<p><strong>Date de soumission :</strong> {{ devis.date_creation|date:"d/m/Y H:i" }}</p>
+<p><strong>Statut :</strong> 
+  <span class="badge bg-info">{{ devis.get_statut_display }}</span>
+</p>
+
+<h4 class="mt-4">🆕 Produit concerné :</h4>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Désignation</th>
+      <th>Quantité Prévisionnelle</th>
+      <th>Unité</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ devis.designation_produit }}</td>
+      <td>{{ devis.quantite_previsionnelle }}</td>
+      <td>{{ devis.unite }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr class="my-4">
+
+<form method="post">
+  {% csrf_token %}
+  <div class="d-flex gap-3">
+    <button type="submit" name="action" value="creer_proforma" class="btn btn-success">
+      ✅ Créer une Proforma
+    </button>
+    <button type="submit" name="action" value="retour" class="btn btn-secondary">
+      🔙 Retour
+    </button>
+  </div>
+</form>
+{% endblock %}
