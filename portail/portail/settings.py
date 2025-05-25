@@ -17,7 +17,9 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = ['client-portal-production-7b2f.up.railway.app','localhost,127.0.0.1']
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://client-portal-production-7b2f.up.railway.app",
+]
 # Application definition
 
 INSTALLED_APPS = [
