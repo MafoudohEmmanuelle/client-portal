@@ -123,9 +123,11 @@ def devis_complet(request):
 @login_required
 def traiter_devis(request, devis_id):
     devis = get_object_or_404(DevisNouveauProduit, pk=devis_id)
-    support_formset = SupportFormSet(request.POST)
+
     if request.method == 'POST':
+        support_formset = SupportFormSet(request.POST, prefix='support', queryset=Support.objects.none())
         action = request.POST.get("action")
+
         if action == "soumettre":
             if support_formset.is_valid():
                 for form in support_formset:
@@ -133,19 +135,19 @@ def traiter_devis(request, devis_id):
                         support = form.save(commit=False)
                         support.devis = devis
                         support.save()
-                        devis.statut='envoye_be'
-                        devis.save()
-                for form in support_formset.deleted_forms:
-                    if form.instance.pk:
-                        form.instance.delete()
-                be=BE.objects.get(pk=1)
+                devis.statut = 'envoye_be'
+                devis.save()
+
+                # Send notification to BE
+                be = BE.objects.get(pk=1)
                 envoyer_email_notification(
                     "Nouveau devis reçu",
                     f"Un nouveau devis a été soumis par {devis.client.nom_entreprise}.",
                     [be.user.email]
                 )
-                messages.success(request,"Demande de devis soumis au BE")
+                messages.success(request, "Demande de devis soumise au BE.")
                 return redirect('commercial_dashboard')
+
         elif action == "modifier":
             devis.update_date = timezone.now()
             devis.statut = "en_traitement"
@@ -157,12 +159,15 @@ def traiter_devis(request, devis_id):
             devis.statut = "en_traitement"
             devis.save()
             return redirect('devis_par_client')
+
     else:
-        support_formset = SupportFormSet(queryset=Support.objects.none())
+        support_formset = SupportFormSet(prefix='support', queryset=Support.objects.none())
+
     return render(request, 'devis/traiter_devis.html', {
         'devis': devis,
         'support_formset': support_formset
     })
+
 
 @login_required
 def traiter_devis_be(request, devis_id):
@@ -170,24 +175,24 @@ def traiter_devis_be(request, devis_id):
     supports = Support.objects.filter(devis=devis)
     if request.method == 'POST':
         form = BEDevisForm(request.POST)
-        coloration_formset = ColorationFormSet(request.POST,prefix='coloration')
-        outillage_formset = OutillageFormSet(request.POST, prefix='outillage')
+        coloration_formset = ColorationFormSet(request.POST, prefix='coloration', queryset=Coloration.objects.none())
+        outillage_formset = OutillageFormSet(request.POST, prefix='outillage', queryset=Outillage.objects.none())
         cotation_formset = CotationFormSet(request.POST, prefix='cotation')
 
         if 'soumettre' in request.POST:
-            if form.is_valid():
+            if form.is_valid() and cotation_formset.is_valid() and coloration_formset.is_valid() and outillage_formset.is_valid():
                 analyse = form.save()
-                for cform in coloration_formset:
-                    if cform.is_valid():
-                        coloration = cform.save(commit=False)
-                        coloration.analyseTech = analyse
+                for form in coloration_formset:
+                    if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                        coloration = form.save(commit=False)
+                        coloration.devis = devis
                         coloration.save()
 
-                for oform in outillage_formset:
-                    if oform.is_valid():
-                        outillage = oform.save(commit=False)
-                        outillage.analyse = analyse
-                        outillage.save()
+                for form in outillage_formset:
+                    if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                        outil = form.save(commit=False)
+                        outil.devis = devis
+                        outil.save()
 
                 for coform in cotation_formset:
                     if coform.is_valid():
@@ -234,8 +239,8 @@ def traiter_devis_be(request, devis_id):
 
     else:
         form = BEDevisForm()
-        coloration_formset = ColorationFormSet(prefix='coloration')
-        outillage_formset = OutillageFormSet(prefix='outillage')
+        coloration_formset = ColorationFormSet(prefix='coloration', queryset=Coloration.objects.none())
+        outillage_formset = OutillageFormSet(prefix='outillage', queryset=Outillage.objects.none())
         cotation_formset = CotationFormSet(prefix='cotation')
 
 

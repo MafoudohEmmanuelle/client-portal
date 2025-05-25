@@ -56,7 +56,7 @@ class FinitionConditionnement(models.Model):
     mode_livraison = models.TextField(choices=choix_livraison)
     sens_deroulement = models.CharField(choices=choix_deroulement, max_length=100, blank=True, null=True)
     nature_mandrin = models.CharField(choices=choix_mandrin, max_length=100, blank=True, null=True)
-    diametre_mandrin = models.CharField(choices=choix_diametre,blank=True, null=True)
+    diametre_mandrin = models.CharField(choices=choix_diametre,blank=True, null=True,  max_length=100)
     epaisseur_mandrin = models.FloatField(blank=True, null=True)
     poids_max_bobine = models.FloatField(blank=True, null=True)
     diametre_bobine= models.FloatField(blank=True, null=True)
@@ -64,7 +64,7 @@ class FinitionConditionnement(models.Model):
     autocolant_utilise = models.BooleanField(default=False)
     espace_pose_min = models.FloatField(blank=True, null=True)
     espace_pose_max = models.FloatField(blank=True, null=True)
-    contenant=models.CharField(choices=choix_contenance,blank=True, null=True, help_text="Vous n\'aurez pas forcement besoin de choisir un contenant si vous avez choisir la bobine comme mode de livraison")
+    contenant=models.CharField(choices=choix_contenance,blank=True, null=True, max_length=100, help_text="Vous n\'aurez pas forcement besoin de choisir un contenant si vous avez choisir la bobine comme mode de livraison")
     conditionnement = models.CharField(choices=choix_emballage,max_length=100)
     nb_pieces= models.PositiveIntegerField(blank=True, null=True, help_text="Donner le nombre de pièces par bobine,par carton, par parquet ou par pile dependant de ce que vous avez choisi")
 

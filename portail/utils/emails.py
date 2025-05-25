@@ -5,7 +5,7 @@ def envoyer_email_notification(sujet, message, destinataires):
     send_mail(
         subject=sujet,
         message=message,
-        from_email=settings.DEFAULT_FROM_EMAIL,
+        from_email=settings.EMAIL_HOST_USER,
         recipient_list=destinataires,
         fail_silently=False,
     )

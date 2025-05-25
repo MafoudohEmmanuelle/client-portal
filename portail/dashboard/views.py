@@ -43,23 +43,26 @@ def commandes_par_client(request):
 
     now = timezone.now()
     start_month = now.replace(day=1)
-    clients = Client.objects.filter(commercial=commercial)
 
-    labels = []
-    data = []
-
-    for client in clients:
-        count = Commande.objects.filter(
-            client=client,
+    # Get all delivered commandes for this month from commercial's clients
+    commandes = (
+        Commande.objects.filter(
+            client__commercial=commercial,
             statut='delivered',
             date_creation__gte=start_month
-        ).count()
+        )
+        .values('client__nom_entreprise')
+        .annotate(nombre=Count('id'))
+        .order_by('client__nom_entreprise')
+    )
 
-        if count > 0:
-            labels.append(client.nom_entreprise)
-            data.append(count)
+    labels = [entry['client__nom_entreprise'] for entry in commandes]
+    data = [entry['nombre'] for entry in commandes]
 
-    return JsonResponse({'labels': labels, 'data': data})
+    return JsonResponse({
+        'labels': labels,
+        'data': data,
+    })
 
 def client_dashboard(request):
     if request.user.is_authenticated:

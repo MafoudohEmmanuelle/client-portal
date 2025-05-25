@@ -74,28 +74,54 @@
       {% if support_formset.errors %}
       <div class="alert alert-danger">Erreur dans le formulaire. Merci de vérifier les champs.</div>
       {% endif %}
+      
       <form method="post">
         {% csrf_token %}
         {{ support_formset.management_form }}
-        {% for form in support_formset %}
-        <div class="row mb-3 border rounded p-2">
-          <div class="col-md-3">
-            {{ form.type_support.label_tag }} {{ form.type_support }}
+  
+        <div id="support-formset">
+          {% for form in support_formset %}
+          <div class="formset row mb-3 border rounded p-2">
+            <div class="col-md-3">
+              {{ form.type_support.label_tag }} {{ form.type_support }}
+            </div>
+            <div class="col-md-2">
+              {{ form.couleur.label_tag }} {{ form.couleur }}
+            </div>
+            <div class="col-md-2">
+              {{ form.epaisseur.label_tag }} {{ form.epaisseur }}
+            </div>
+            <div class="col-md-2">
+              {{ form.grammage.label_tag }} {{ form.grammage }}
+            </div>
           </div>
-          <div class="col-md-2">
-            {{ form.couleur.label_tag }} {{ form.couleur }}
-          </div>
-          <div class="col-md-2">
-            {{ form.epaisseur.label_tag }} {{ form.epaisseur }}
-          </div>
-          <div class="col-md-2">
-            {{ form.grammage.label_tag }} {{ form.grammage }}
-          </div>
-          <div class="col-md-2">
-            <button type="button" id="add-form" class="btn btn-dark">+ Ajouter un support</button>
+          {% endfor %}
+        </div>
+  
+        <!-- Button to add support form -->
+        <div class="mt-2">
+          <button type="button" id="add-support" class="btn btn-dark">+ Ajouter un support</button>
+        </div>
+  
+        <!-- Hidden empty form template -->
+        <div id="empty-support-form" style="display:none;">
+          <div class="formset row mb-3 border rounded p-2">
+            <div class="col-md-3">
+              {{ support_formset.empty_form.type_support.label_tag }} {{ support_formset.empty_form.type_support }}
+            </div>
+            <div class="col-md-2">
+              {{ support_formset.empty_form.couleur.label_tag }} {{ support_formset.empty_form.couleur }}
+            </div>
+            <div class="col-md-2">
+              {{ support_formset.empty_form.epaisseur.label_tag }} {{ support_formset.empty_form.epaisseur }}
+            </div>
+            <div class="col-md-2">
+              {{ support_formset.empty_form.grammage.label_tag }} {{ support_formset.empty_form.grammage }}
+            </div>
           </div>
         </div>
-        {% endfor %}
+  
+        <!-- Submit buttons -->
         <div class="mt-4 d-flex gap-2">
           <button type="submit" class="btn btn-warning" name="action" value="modifier">🛠 Modifier le devis</button>
           <button type="submit" class="btn btn-secondary" name="action" value="retour">↩️ Retour</button>
@@ -103,23 +129,36 @@
         </div>
       </form>
     </div>
-  </div>
+  </div>  
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  const formContainer = $('#form-container');
-  const addButton = $('#add-form');
-  let totalForms = $('#id_form-TOTAL_FORMS');
+  function cloneForm(prefix) {
+    const formsetDiv = document.getElementById(`${prefix}-formset`);
+    const totalForms = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+    const currentCount = parseInt(totalForms.value);
 
-  addButton.on('click', function () {
-    const formCount = parseInt(totalForms.val());
-    const emptyFormHtml = $('#empty-form').html(); // Only form fields inside
+    // Get empty form HTML
+    const emptyFormDiv = document.getElementById(`empty-${prefix}-form`);
+    const newFormHtml = emptyFormDiv.innerHTML.replace(/__prefix__/g, currentCount);
 
-    const newFormHtml = emptyFormHtml.replace(/__prefix__/g, formCount);
-    const newFormDiv = $('<div class="support-form border p-2 my-2"></div>').html(newFormHtml);
+    const newForm = document.createElement('div');
+    newForm.classList.add('formset');
+    newForm.innerHTML = newFormHtml;
 
-    formContainer.append(newFormDiv);
-    totalForms.val(formCount + 1);
+    formsetDiv.appendChild(newForm);
+    totalForms.value = currentCount + 1;
+  }
+
+  document.getElementById('add-support').addEventListener('click', function () {
+    cloneForm('support');
+  });
+
+  // If other formsets exist
+  document.getElementById('add-coloration')?.addEventListener('click', function () {
+    cloneForm('coloration');
+  });
+  document.getElementById('add-outillage')?.addEventListener('click', function () {
+    cloneForm('outillage');
   });
 </script>
 {% endblock %}
