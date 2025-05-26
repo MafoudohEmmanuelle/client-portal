@@ -2,41 +2,39 @@
 {% block title %}Offres Client{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">📑 Mes Proformas</h2>
+<h2 class="mb-4">📑 Mes Offres (Proformas)</h2>
 
-<div class="row">
-  <!-- Colonne pour les nouveaux produits -->
-  <div class="col-md-6">
-    <h4>🆕 Proformas pour nouveaux produits</h4>
-    {% for proforma in proformas_nouveaux %}
-    <div class="card mb-3 shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">Offre #{{ proforma.id }}</h5>
-        <p><strong>Date :</strong> {{ proforma.date_envoie|date:"d/m/Y" }}</p>
-        <p><strong>Total HT :</strong> {{ proforma.montant_total_ht }} FCFA</p>
-        <a href="{% url 'detail_proforma_client' proforma.id %}" class="btn btn-primary btn-sm">🔎 Détail</a>
-      </div>
-    </div>
+<table class="table table-hover table-bordered align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Type</th>
+      <th>Numéro</th>
+      <th>Date</th>
+      <th>Total HT</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for proforma in all_proformas %}
+    <tr>
+      <td>{{ proforma.produit_type }}</td>
+      <td>#{{ proforma.id }}</td>
+      <td>{{ proforma.date_envoie|date:"d/m/Y" }}</td>
+      <td>{{ proforma.montant_total_ht }} FCFA</td>
+      <td>
+        <a href="{% url 'detail_proforma_client' proforma.id %}" class="btn btn-sm btn-outline-primary">
+          🔎 Détail
+        </a>
+      </td>
+    </tr>
     {% empty %}
-    <p>Aucune offre disponible pour nouveaux produits.</p>
+    <tr>
+      <td colspan="5" class="text-center text-muted">Aucune offre disponible.</td>
+    </tr>
     {% endfor %}
-  </div>
-  <!-- Colonne pour les anciens produits -->
-<div class="col-md-6">
-  <h4>🧾 Proformas pour produits existants</h4>
-  {% for proforma in proformas_anciens %}
-  <div class="card mb-3 shadow-sm">
-    <div class="card-body">
-      <h5 class="card-title">Offre #{{ proforma.id }}</h5>
-      <p><strong>Date :</strong> {{ proforma.date_envoie|date:"d/m/Y" }}</p>
-      <p><strong>Total HT :</strong> {{ proforma.montant_total_ht }} FCFA</p>
-      <a href="{% url 'detail_proforma_client' proforma.id %}" class="btn btn-primary btn-sm">🔎 Détail</a>
-    </div>
-  </div>
-  {% empty %}
-  <p>Aucune offre disponible pour produits existants.</p>
-  {% endfor %}
-</div>
-</div>
-
+  </tbody>
+</table>
+<div class="d-flex gap-2">
+  <a href="{% url 'client_dashboard' %}" class="btn btn-secondary">↩️ Retour</a>
+</div> 
 {% endblock %}

@@ -11,8 +11,8 @@ class Produit(models.Model):
     
 class Proforma(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    quote = models.OneToOneField('ProduitQuote', on_delete=models.SET_NULL, null=True, blank=True)
-    devis = models.ForeignKey(DevisNouveauProduit, on_delete=models.SET_NULL, null=True, blank=True)
+    quote = models.ForeignKey('ProduitQuote', on_delete=models.CASCADE, null=True, blank=True, related_name="proformas")
+    devis = models.ForeignKey(DevisNouveauProduit, on_delete=models.CASCADE, null=True, blank=True, related_name="proformas")
     modalites_reglement = models.TextField()
     condition_ht = models.TextField(blank=True, null=True)
     montant_total_ht = models.DecimalField(max_digits=12, decimal_places=2)
@@ -36,7 +36,7 @@ class Proforma(models.Model):
 
 class ProformaItem(models.Model):
     proforma = models.ForeignKey(Proforma, on_delete=models.CASCADE, related_name='items')
-    produit = models.ForeignKey(Produit, on_delete=models.SET_NULL, null=True, blank=True)
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE, null=True, blank=True)
     designation = models.CharField(max_length=100)
     quantite = models.PositiveIntegerField()
     unite = models.CharField(max_length=20, choices=[('kg', 'Kg'), ('pièce', 'Pièce')])

@@ -14,6 +14,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db.models import Count
 from utils.emails import envoyer_email_notification
 
 
@@ -113,7 +114,8 @@ def lead_validation(request, lead_id):
         # Pre-fill the form with lead data
         form = ClientRegistrationCmcForm(initial={
             'nom_entreprise': lead.raison_sociale,
-            'interlocuteur': lead.telephone,
+            'interlocuteur': lead.interlocuteur,
+            'email': lead.email,  # <-- Make sure this field exists on the form
             'pays': lead.pays,
             'ville': lead.ville,
             'rue': lead.rue,
@@ -281,9 +283,9 @@ def liste_clients_cmc(request):
     })
 
 def liste_commercial(request):
-    commercial = Commercial.objects.all()
+    commerciaux = Commercial.objects.annotate(nb_clients=Count('clients'))
     return render(request, 'accounts/liste_commercial.html', {
-        'commercial': commercial
+        'commerciaux': commerciaux
     })
 
 def liste_lead(request):

@@ -11,6 +11,8 @@ from django.db.models import Count
 import calendar
 from django.db.models import Q
 from django.utils import timezone
+from datetime import timedelta, datetime
+import json
 
 def commandes_par_mois(request):
     client = Client.objects.get(user=request.user)
@@ -34,36 +36,6 @@ def commandes_par_mois(request):
         'labels': labels,
         'data': data,
     })
-
-def commandes_par_client(request):
-    try:
-        commercial = request.user.commercial
-    except:
-        return JsonResponse({'labels': [], 'data': []})
-
-    now = timezone.now()
-    start_month = now.replace(day=1)
-
-    # Get all delivered commandes for this month from commercial's clients
-    commandes = (
-        Commande.objects.filter(
-            client__commercial=commercial,
-            statut='delivered',
-            date_creation__gte=start_month
-        )
-        .values('client__nom_entreprise')
-        .annotate(nombre=Count('id'))
-        .order_by('client__nom_entreprise')
-    )
-
-    labels = [entry['client__nom_entreprise'] for entry in commandes]
-    data = [entry['nombre'] for entry in commandes]
-
-    return JsonResponse({
-        'labels': labels,
-        'data': data,
-    })
-
 def client_dashboard(request):
     if request.user.is_authenticated:
         try:
@@ -102,7 +74,7 @@ def commercial_dashboard(request):
 
         clients = Client.objects.filter(commercial=commercial)
 
-        # Devis à traiter (non complets)
+        # Devis à traiter
         unread_devis = DevisNouveauProduit.objects.filter(
             client__in=clients,
             statut__in=["nouveau", "en_traitement"]
@@ -114,28 +86,52 @@ def commercial_dashboard(request):
             statut__in=["en_traitement"]
         )
 
-        # Devis complets (retour du BE)
+        # Devis complets
         complet_devis = DevisNouveauProduit.objects.filter(
             client__in=clients,
             statut="complet"
         )
 
-        # Commandes en attente
+        # Nouvelles commandes
         new_orders_count = Commande.objects.filter(
             client__in=clients,
             statut='en_attente'
         ).count()
 
-        # Proforma par statut (pour le suivi)
-        proformas = Proforma.objects.filter(client__in=clients)
-        proformas_en_attente = proformas.filter(statut='en_attente').count()
-        proformas_valide = proformas.filter(statut='valide').count()
-        proformas_acceptee = proformas.filter(statut='acceptee').count()
-        proformas_refusee = proformas.filter(statut='refusee').count()
-        proformas_non_valide = proformas.filter(statut='non_valide').count()
+        six_months_ago = datetime.now() - timedelta(days=180)
 
-        # Dernières proformas (5 plus récentes)
-        latest_proformas = proformas.select_related('client').order_by('-date_envoie')[:5]
+        proforma_stats_qs = (
+            Proforma.objects
+            .filter(client__commercial=commercial, date_envoie__gte=six_months_ago)
+            .annotate(month=TruncMonth("date_envoie"))
+            .values("month")
+            .annotate(
+                sent=Count("id"),
+                accepted=Count("id", filter=Q(statut='acceptee'))
+            )
+            .order_by("month")
+        )
+
+        proforma_stats = [
+            {
+                "month": stat["month"].strftime("%b %Y"),
+                "sent": stat["sent"],
+                "accepted": stat["accepted"],
+            }
+            for stat in proforma_stats_qs
+        ]
+
+        now = datetime.now()
+        commandes_par_client = (
+            Commande.objects
+            .filter(
+                client__commercial=commercial,
+                date_creation__month=now.month,
+                date_creation__year=now.year
+            )
+            .values('client__nom_entreprise')
+            .annotate(total=Count('id'))
+        )
 
         context = {
             'clients_count': clients.count(),
@@ -144,13 +140,10 @@ def commercial_dashboard(request):
             'complete_devis_count': complet_devis.count(),
             'new_orders_count': new_orders_count,
             'unread_quotes': unread_quotes.count(),
-            'proformas_en_attente': proformas_en_attente,
-            'proformas_valide': proformas_valide,
-            'proformas_acceptee': proformas_acceptee,
-            'proformas_refusee': proformas_refusee,
-            'proformas_non_valide': proformas_non_valide,
-            'latest_proformas': latest_proformas,
+            'proforma_stats': json.dumps(proforma_stats),
+            'commandes_par_client': json.dumps(list(commandes_par_client)),
         }
+
         return render(request, 'dashboard/commercial_dashboard.html', context)
     else:
         return redirect('user_login')
@@ -162,14 +155,30 @@ def chef_dashboard(request):
         except ChefCommercial.DoesNotExist:
             return HttpResponseForbidden("Vous n'êtes pas le chef du commercial.")
         clients_count=Client.objects.all().count()
+        today = timezone.now().date()
+        first_day = today.replace(day=1)
         new_proforma=Proforma.objects.filter(statut='en_attente').count()
         new_orders_count = Commande.objects.filter(statut='pending').count()
         leads_count=LeadRequest.objects.filter(valide=True, converted=False).count()
+        clients_per_commercial = Client.objects.values('commercial__nom_commercial').annotate(total=Count('id'))
+        commandes = Commande.objects.filter(date_creation__gte=first_day)
+        commandes_per_commercial = commandes.values('client__commercial__nom_commercial').annotate(total=Count('id'))
+        proforma_stats = []
+        for i in range(6):
+            month = today - timedelta(days=i*30)
+            month_name = calendar.month_name[month.month]
+            proformas = Proforma.objects.filter(date_envoie__year=month.year, date_envoie__month=month.month)
+            accepted = proformas.filter(statut='acceptee').count()
+            refused = proformas.filter(statut='refusee').count()
+            proforma_stats.append({'month': month_name, 'accepted': accepted, 'refused': refused})
         context = {
             'clients_count': clients_count,
             'new_proforma':new_proforma,
             'new_orders_count': new_orders_count,
-            'leads_count': leads_count
+            'leads_count': leads_count,
+            'clients_per_commercial': list(clients_per_commercial),
+            'commandes_per_commercial': list(commandes_per_commercial),
+            'proforma_stats': list(reversed(proforma_stats)),
         }
         return render(request,'dashboard/chef_dashboard.html',context)
     else:

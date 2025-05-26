@@ -16,7 +16,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = ['client-portal-production-7b2f.up.railway.app','localhost,127.0.0.1']
+ALLOWED_HOSTS = ['client-portal-production-7b2f.up.railway.app','localhost','127.0.0.1']
 CSRF_TRUSTED_ORIGINS = [
     "https://client-portal-production-7b2f.up.railway.app",
 ]

@@ -1,68 +1,91 @@
 {% extends "dashboard/base.html" %}
-{% block title %}📋 Devis et Cotations{% endblock %}
+{% block title %}📋 Devis & Cotations{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">📋 Suivi des Devis et Demandes de Cotation</h2>
+<h2 class="mb-4">📋 Historique des Devis et Demandes de Cotation</h2>
 
-<!-- ACCORDION -->
-<div class="accordion" id="accordionDevisQuotes">
+<table class="table table-hover table-bordered align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Date</th>
+      <th>Type</th>
+      <th>Client</th>
+      <th>Désignation / Détail</th>
+      <th>Offres</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in page_obj %}
+      <tr>
+        <td>{{ item.date_creation|date:"d/m/Y" }}</td>
+        <td>
+          {% if item.type_label == "devis" %}
+            <span class="badge bg-primary">Devis Produit Nouveau</span>
+          {% else %}
+            <span class="badge bg-success">Demande Produit Existant</span>
+          {% endif %}
+        </td>
+        <td>{{ item.client.nom_entreprise }}</td>
+        <td>
+          {% if item.type_label == "devis" %}
+            {{ item.designation_produit }}
+          {% else %}
+            Demande de cotation du {{ item.date_creation|date:"d/m/Y" }}
+          {% endif %}
+        </td>
+        <td>
+          {% if item.type_label == "devis" %}
+            <a href="{% url 'proforma_devis' item.id %}" class="btn btn-outline-primary btn-sm">
+              📑 Voir offres <span class="badge bg-secondary">{{ item.nb_proformas }}</span>
+            </a>
+          {% else %}
+            <a href="{% url 'proforma_quote' item.id %}" class="btn btn-outline-success btn-sm">
+              📑 Voir offres <span class="badge bg-secondary">{{ item.nb_proformas }}</span>
+            </a>
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="5" class="text-center text-muted">Aucun devis ou demande de cotation trouvée.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-  <!-- DEVIS SECTION -->
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingDevis">
-      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDevis">
-        📄 Devis (Produits Nouveaux) <span class="badge bg-primary ms-2">{{ devis_list|length }}</span>
-      </button>
-    </h2>
-    <div id="collapseDevis" class="accordion-collapse collapse show" data-bs-parent="#accordionDevisQuotes">
-      <div class="accordion-body">
-        {% if devis_list %}
-          {% for devis in devis_list %}
-            <div class="card mb-3 shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title">{{ devis.designation_produit }}</h5>
-                <p><strong>Client :</strong> {{ devis.client.nom_entreprise }}</p>
-                <p><strong>Date :</strong> {{ devis.date_creation|date:"d/m/Y" }}</p>
-                <a href="{% url 'proforma_devis' devis.id %}" class="btn btn-outline-primary">
-                  📑 Voir les offres <span class="badge bg-secondary">{{ devis.proforma_set.count }}</span>
-                </a>
-              </div>
-            </div>
-          {% endfor %}
-        {% else %}
-          <p class="text-muted">Aucun devis trouvé.</p>
-        {% endif %}
-      </div>
-    </div>
-  </div>
+<!-- Pagination Controls -->
+<nav>
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page=1">&laquo;</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+      <li class="page-item disabled"><span class="page-link">Précédent</span></li>
+    {% endif %}
 
-  <!-- QUOTES SECTION -->
-  <div class="accordion-item mt-3">
-    <h2 class="accordion-header" id="headingQuotes">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQuotes">
-        🧾 Demandes de Cotation (Produits Existants) <span class="badge bg-success ms-2">{{ quotes_list|length }}</span>
-      </button>
-    </h2>
-    <div id="collapseQuotes" class="accordion-collapse collapse" data-bs-parent="#accordionDevisQuotes">
-      <div class="accordion-body">
-        {% if quotes_list %}
-          {% for quote in quotes_list %}
-            <div class="card mb-3 shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title">Demande du {{ quote.date_creation|date:"d/m/Y" }}</h5>
-                <p><strong>Client :</strong> {{ quote.client.nom_entreprise }}</p>
-                <a href="{% url 'proforma_quote' quote.id %}" class="btn btn-outline-success">
-                  📑 Voir les offres <span class="badge bg-secondary">{{ quote.proforma_set.count }}</span>
-                </a>
-              </div>
-            </div>
-          {% endfor %}
-        {% else %}
-          <p class="text-muted">Aucune demande de cotation trouvée.</p>
-        {% endif %}
-      </div>
-    </div>
-  </div>
+    <li class="page-item active">
+      <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
 
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">&raquo;</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Suivant</span></li>
+      <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+    {% endif %}
+  </ul>
+</nav>
+<div>
+  <a href="{% url 'commercial_dashboard' %}" class="btn btn-outline-secondary">Retour</a>
 </div>
 {% endblock %}

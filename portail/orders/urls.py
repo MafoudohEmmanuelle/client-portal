@@ -8,4 +8,5 @@ urlpatterns = [
     path('mes-commandes/<int:id_commande>/', views.commande_detail_client, name='commande_detail_client'),
     path('commandes/<int:commande_id>', views.valider_commande_view, name='valider_commande'),
     path('commandes/', views.liste_commandes, name='liste_commandes'),
+    path('commandes/liste', views.liste_commandes_cmc, name='liste_commandes_cmc'),
 ]

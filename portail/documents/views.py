@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from documents.models import GeneratedDoc,Document
 from accounts.models import Commercial,ChefCommercial,Client
 from devis.models import DevisNouveauProduit
+from proforma.models import Proforma
 from django.utils import timezone
 from django.contrib import messages
 from django.core.files.base import ContentFile
@@ -73,8 +74,6 @@ def upload_document(request, commande_id):
         'form': form,
         'commande': commande
     })
-
-
 @login_required
 def mes_documents(request):
     try:
@@ -87,29 +86,36 @@ def mes_documents(request):
     commandes_avec_docs = []
     for commande in commandes:
         uploaded_docs = commande.documents.all().order_by('-date_upload')
-        proformas = GeneratedDoc.objects.filter(type_doc='proforma', proforma__commande=commande).order_by('-date_creation')
+
+        # Récupérer les proformas générés liés à cette commande
+        proformas = GeneratedDoc.objects.filter(
+            type_doc='proforma',
+            commande=commande
+        ).order_by('-date_creation')
+
         commandes_avec_docs.append({
             'commande': commande,
             'uploaded_documents': uploaded_docs,
             'proformas': proformas,
         })
 
-    # Paginate commandes
-    paginator = Paginator(commandes_avec_docs, 5)  # Show 5 commandes per page
+    paginator = Paginator(commandes_avec_docs, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'documents/mes_documents.html', {
         'page_obj': page_obj
     })
-
 @login_required
 def be_documents(request):
-    devis_gen = GeneratedDoc.objects.filter(type_doc='devis')
-    return render(request, 'documents/be_documents.html', {
-        'devis_gen': devis_gen,
-    })
+    devis_gen = GeneratedDoc.objects.filter(type_doc='devis').order_by('-date_creation')
+    paginator = Paginator(devis_gen,10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
+    return render(request, 'documents/be_documents.html', {
+        'page_obj': page_obj
+    })
 @login_required
 def commercial_documents(request):
     try:

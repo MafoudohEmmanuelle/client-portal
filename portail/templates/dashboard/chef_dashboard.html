@@ -34,7 +34,7 @@
       </a>
     </div>
     <div class="col-md-2">
-      <a href="#" class="text-decoration-none">
+      <a href="{% url 'liste_commandes_cmc' %}" class="text-decoration-none">
         <div class="card card-custom text-center p-3">
           <i class="bi bi-cart-check fs-2 text-info mb-2"></i>
           <h6>Nouvelles commandes</h6>
@@ -42,12 +42,122 @@
         </div>
       </a>
     </div>
-    <div class="col-md-2">
-      <div class="card card-custom text-center p-3">
-        <i class="bi bi-box-seam fs-2 text-danger mb-2"></i>
-        <h6>Commandes Payées</h6>
-        <p class="fs-4 fw-bold text-danger"></p>
+    <div class="col-md-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <canvas id="clientsParCommercial" height="20"></canvas>
+        </div>
       </div>
     </div>
   </div>
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <canvas id="commandesParCommercial" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <canvas id="proformaStats" height="150"></canvas>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  {{ commandes_per_commercial|json_script:"commandes-data" }}
+  {{ proforma_stats|json_script:"proforma-data" }}
+  {{ clients_per_commercial|json_script:"clients-data" }}
+  
+  <script>
+    // COMMANDES
+    const commandesRaw = JSON.parse(document.getElementById('commandes-data').textContent);
+    const commandesLabels = commandesRaw.map(item => item.client__commercial__nom_commercial);
+    const commandesTotals = commandesRaw.map(item => item.total);
+  
+    new Chart(document.getElementById('commandesParCommercial'), {
+      type: 'bar',
+      data: {
+        labels: commandesLabels,
+        datasets: [{
+          label: 'Commandes (ce mois)',
+          data: commandesTotals,
+          backgroundColor: 'rgba(54, 162, 235, 0.7)'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Commandes par Commercial (Ce Mois)'
+          }
+        }
+      }
+    });
+  
+    // PROFORMAS
+    const proformaRaw = JSON.parse(document.getElementById('proforma-data').textContent);
+    const proformaLabels = proformaRaw.map(item => item.month);
+    const acceptedData = proformaRaw.map(item => item.accepted);
+    const refusedData = proformaRaw.map(item => item.refused);
+  
+    new Chart(document.getElementById('proformaStats'), {
+      type: 'line',
+      data: {
+        labels: proformaLabels,
+        datasets: [
+          {
+            label: 'Acceptées',
+            data: acceptedData,
+            borderColor: 'green',
+            fill: false
+          },
+          {
+            label: 'Refusées',
+            data: refusedData,
+            borderColor: 'red',
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Proformas Acceptées vs Refusées (6 derniers mois)'
+          }
+        }
+      }
+    });
+  
+    // CLIENTS PAR COMMERCIAL
+    const clientRaw = JSON.parse(document.getElementById('clients-data').textContent);
+    const clientLabels = clientRaw.map(item => item.commercial__nom_commercial);
+    const clientData = clientRaw.map(item => item.total);
+  
+    new Chart(document.getElementById('clientsParCommercial'), {
+      type: 'pie',
+      data: {
+        labels: clientLabels,
+        datasets: [{
+          data: clientData,
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#76B041']
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Répartition des Clients par Commercial'
+          }
+        }
+      }
+    });
+  </script>
 {% endblock %}

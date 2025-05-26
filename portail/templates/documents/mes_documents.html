@@ -11,6 +11,7 @@
       <span>📅 {{ bloc.commande.date_creation|date:"d/m/Y" }}</span>
     </div>
     <ul class="list-group list-group-flush">
+
       {% if bloc.uploaded_documents %}
         <li class="list-group-item bg-light"><strong>📄 Documents téléversés :</strong></li>
         {% for doc in bloc.uploaded_documents %}
@@ -42,6 +43,7 @@
     </ul>
   </div>
 {% endfor %}
+
 <nav aria-label="Pagination">
   <ul class="pagination justify-content-center">
     {% if page_obj.has_previous %}
@@ -59,6 +61,7 @@
     {% endif %}
   </ul>
 </nav>
+
 <div class="d-flex justify-content-between mt-4">
   <a href="{% url 'client_dashboard' %}" class="btn btn-secondary">← Retour</a>
 </div>

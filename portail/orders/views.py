@@ -17,6 +17,7 @@ def passer_commande_depuis_proforma(request, proforma_id):
         client = Client.objects.get(user=request.user)
     except Client.DoesNotExist:
         raise Http404("Aucun client associé à cet utilisateur.")
+
     proforma = get_object_or_404(Proforma, id=proforma_id, client=client, statut='acceptee')
 
     if request.method == 'POST':
@@ -31,6 +32,11 @@ def passer_commande_depuis_proforma(request, proforma_id):
             commande.statut = 'en_attente'
             commande.save()
 
+            # Associer la commande au document généré de la proforma
+            if proforma.generated_doc:
+                proforma.generated_doc.commande = commande
+                proforma.generated_doc.save()
+
             # Enregistrer le bon de commande comme document lié
             document = bon_form.save(commit=False)
             document.commande = commande
@@ -39,6 +45,7 @@ def passer_commande_depuis_proforma(request, proforma_id):
             document.type_documents = 'bon_commande'
             document.date_upload = timezone.now()
             document.save()
+
             envoyer_email_notification(
                 "Nouvelle commande",
                 f"Le client {commande.client.nom_entreprise} a passé une nouvelle commande.",
@@ -138,3 +145,12 @@ def commande_detail(request, commande_id):
         'documents': documents
     })
 
+@login_required
+def liste_commandes_cmc(request):
+    all_commandes = Commande.objects.all().order_by('-date_creation')
+    paginator = Paginator(all_commandes, 10)  # 10 commandes par page
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'commande/liste_commande_cmc.html', {'page_obj': page_obj})

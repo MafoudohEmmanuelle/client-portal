@@ -138,68 +138,47 @@
         <tbody>
             {% for support in supports%}
             <tr>
-                <td class="ans">{{ support.nature_support }}</td>
-                <td class="ans">{{ support.couleur_support }}</td>
-                <td class="ans">{{ support.epaisseur_support }}</td>
-                <td class="ans">{{ support.grammage_support }}</td>
+                <td class="ans">{{ support.type_support }}</td>
+                <td class="ans">{{ support.couleur }}</td>
+                <td class="ans">{{ support.epaisseur }}</td>
+                <td class="ans">{{ support.grammage }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <div class="table-container"> 
-		<table class="table"> 
-			<tr> 
-				<th><i>Quantité</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ devis.quantite_previsionnelle }}</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Unité</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ devis.unite }}</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Format à plat du produit fini</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ devis.longueur_produit }} x {{ devis.largeur_produit }} mm</td> 
-			</tr> 
-		</table> 
-
-	</div> 
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th><i>Quantité</i></th>
+                <th><i>Unité</i></th>
+                <th><i>Format à plat du produit fini</i></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="ans">{{ devis.quantite_previsionnelle }}</td>
+                <td class="ans">{{ devis.unite }}</td>
+                <td class="ans">{{ devis.longueur_produit }} x {{ devis.largeur_produit }} mm</td>
+            </tr>
+        </tbody>
+    </table>
     <div class="section-subtitle"> INFOS FACONNAGE ; FINITIONS & CONDITIONNEMENT </div>
-    <div class="table-container"> 
-		<table class="table"> 
-			<tr> 
-				<th><i>Mode d'utilisation</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ devis.finition_conditionnement.mode_utilisation }}</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Mode de livraison</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ devis.finition_conditionnement.mode_livraison }}</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Emballage du Produit</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ devis.finition_conditionnement.conditionnement }}</td> 
-			</tr> 
-		</table> 
-	</div> 
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th><i>Mode d'utilisation</i></th>
+                <th><i>Mode de livraison</i></th>
+                <th><i>Emballage du Produit</i></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="ans">{{ devis.finition_conditionnement.mode_utilisation }}</td>
+                <td class="ans">{{ devis.finition_conditionnement.mode_livraison }}</td>
+                <td class="ans">{{ devis.finition_conditionnement.conditionnement }}</td>
+            </tr>
+        </tbody>
+    </table>
     <div class="table-container"> 
         {% if devis.finition_conditionnement.mode_livraison|lower == "bobine" %}
         <table class="table">
@@ -225,131 +204,106 @@
 			<tr>
                 {% if devis.finition_conditionnement.mode_livraison|lower == "bobine"%}
                 <td>Nombre de pièces / {{ devis.finition_conditionnement.mode_livraison}}= {{devis.finition_conditionnement.nombre_piece}}</td>
-                <td>Nombre de bobine / {{ devis.finition_conditionnement.contenance_livraison}}= {{devis.finition_conditionnement.nombre_bobine_palette}}</td>
+                <td>Nombre de bobine / {{ devis.finition_conditionnement.contenant}}= {{devis.finition_conditionnement.nombre_bobine_palette}}</td>
                 {% else %}
-                <td>Nombre de pièces / {{ devis.finition_conditionnement.contenance_livraison}}= {{devis.finition_conditionnement.nombre_pieces}}</td>
+                <td>Nombre de pièces / {{ devis.finition_conditionnement.contenant}}= {{devis.finition_conditionnement.nombre_pieces}}</td>
                 {% endif %}
              </tr>      
 		</table> 
 	</div> 
     <div class="section-title">II- PARTIE RESERVEE AU BUREAU D'ETUDES  </div>
-    <div class="table-container"> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Type d'impression</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ analyse.type_impression }}</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Sens d'impression</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ analyse.sens_impression }}</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Type d'encre</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ analyse.type_encre }}</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Colle Complexage</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ analyse.colle_complexage }}</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Plastification</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ analyse.plastification }}</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Découpe</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ analyse.decoupe }}</td> 
-			</tr> 
-		</table> 
-	</div>
-    <div class="table-container"> 
-		<table class="table"> 
-			<tr> 
-				<th><i>Couleurs ou Vernis</i></th> 
-			</tr> 
-            {% for c in colorations %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th><i>Type d'impression</i></th>
+                <th><i>Sens d'impression</i></th>
+                <th><i>Type d'encre</i></th>
+                <th><i>Colle Complexage</i></th>
+                <th><i>Plastification</i></th>
+                <th><i>Découpe</i></th>
+               
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="ans">{{ analyse.type_impression }}</td>
+                <td class="ans">{{ analyse.sens_impression }}</td>
+                <td class="ans">{{ analyse.type_encre }}</td>
+                <td class="ans">{{ analyse.colle_complexage }}</td>
+                <td class="ans">{{ analyse.plastification }}</td>
+                <td class="ans">{{ analyse.decoupe }}</td>
+            </tr>
+        </tbody>
+    </table>
+	<table class="table"> 
+        <tr> 
+            <th><i>Couleurs ou Vernis</i></th> 
+        </tr> 
+        {% for c in colorations %}
+        <tr> 
+            <td class="ans">{{ c.couleur }}</td> 
+        </tr> 
+        {% endfor %}
+	</table> 
+    <table class="table"> 
+        <tr> 
+            <th><i>Outillage</i></th> 
+            <th><i>Quantités</i></th> 
+            <th><i>P.U (fcfa)</i></th> 
+        </tr> 
+        {% for o in outillages %}
             <tr> 
-				<td class="ans">{{ c.couleur }}</td> 
-			</tr> 
-            {% endfor %}
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Couleurs ou Vernis</i></th> 
-			</tr> 
-            {% for c in colorations %}
-            <tr> 
-				<td class="ans">{{ c.couleur }}</td> 
-			</tr> 
-            {% endfor %}
-		</table> 
-        <table class="table"> 
-            <tr> 
-				<th><i>Outillage</i></th> 
-                <th><i>Quantités</i></th> 
-                <th><i>P.U (fcfa)</i></th> 
-			</tr> 
-			{% for o in outillages %}
-                <tr> 
-                    <td class="ans">{{ o.get_type_outillage_display }}</td> 
-                    <td class="ans">{{ o.quantite }}</td> 
-                    <td class="ans">{{ o.prix_unitaire }}</td> 
-                </tr> 
-           {% endfor %}
-		</table> 
-	</div> 
-    <div class="table-container"> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Format à plat du produit fini</i></th> 
-			</tr> 
-			<tr> 
-				<td class="ans">{{ devis.longueur_produit }} x {{ devis.largeur_produit }} mm</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Format support (Laize x l)</i></th> 
-			</tr> 
-            <tr> 
-				<td class="ans">{{ analyse.format_support_longueur}} x {{ analyse.format_support_largeur}} mm</td> 
-			</tr> 
-		</table> 
-        <table class="table"> 
-			<tr> 
-				<th><i>Cotation à l'unité</i></th> 
-                <th><i>Quantité</i></th> 
-                <th><i>Taux mat 1ères</i></th> 
-			</tr> 
-			<tr> 
-				<tr> 
-                    <td class="ans">{{ cotation.cotation_unitaire }}</td> 
-                    <td class="ans">{{ cotation.quantita }}</td> 
-                    <td class="ans">{{ cotation.taux_mat  }}</td> 
-                </tr> 
-			</tr> 
-		</table> 
-	</div>  
+                <td class="ans">{{ o.get_type_outillage_display }}</td> 
+                <td class="ans">{{ o.quantite }}</td> 
+                <td class="ans">{{ o.prix_unitaire }}</td> 
+            </tr> 
+        {% endfor %}
+    </table> 
+         <tr>
+                <th><i>Type d'impression</i></th>
+                <th><i>Sens d'impression</i></th>
+                <th><i>Type d'encre</i></th>
+                <th><i>Colle Complexage</i></th>
+                <th><i>Plastification</i></th>
+                <th><i>Découpe</i></th>
+               
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="ans">{{ analyse.type_impression }}</td>
+                <td class="ans">{{ analyse.sens_impression }}</td>
+                <td class="ans">{{ analyse.type_encre }}</td>
+                <td class="ans">{{ analyse.colle_complexage }}</td>
+                <td class="ans">{{ analyse.plastification }}</td>
+                <td class="ans">{{ analyse.decoupe }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <tr>
+        <th><i>Format à plat du produit fini</i></th>
+        <th><i>Format support (Laize x l)</i></th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td class="ans">{{ devis.longueur_produit }} x {{ devis.largeur_produit }} mm</td>
+        <td class="ans">{{ analyse.format_support_longueur}} x {{ analyse.format_support_largeur}} mm</td>
+    </tr>
+</tbody>
+<table class="table"> 
+    <tr> 
+        <th><i>Cotation à l'unité</i></th> 
+        <th><i>Quantité</i></th> 
+        <th><i>Taux mat 1ères</i></th> 
+    </tr> 
+    <tr> 
+        <tr> 
+            <td class="ans">{{ cotation.cotation_unitaire }}</td> 
+            <td class="ans">{{ cotation.quantite }}</td> 
+            <td class="ans">{{ cotation.taux_mat  }}</td> 
+        </tr> 
+    </tr> 
+</table> 
 </body>
 </html>

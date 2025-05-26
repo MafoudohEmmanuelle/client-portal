@@ -115,7 +115,6 @@
       {% endfor %}
     </tbody>
   </table>
-
   <table class="totaux">
     <tr><td><strong>Total HT :</strong></td><td>{{ proforma.montant_total_ht|floatformat:0 }}</td></tr>
     {% if proforma.tva and proforma.tva|floatformat:0 != "0" %}

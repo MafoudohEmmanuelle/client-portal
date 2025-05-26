@@ -15,6 +15,10 @@ from xhtml2pdf import pisa
 from decimal import Decimal
 from num2words import num2words
 from utils.emails import envoyer_email_notification
+from django.core.paginator import Paginator
+from itertools import chain
+from operator import attrgetter
+from django.db import models
 
 @login_required
 def creer_proforma_nouveau_produit(request, devis_id):
@@ -274,7 +278,7 @@ def refuser_proforma_cmc(request, proforma_id):
 
 @login_required
 def list_proforma(request):
-    proformas = Proforma.objects.filter(statut='en_attente').prefetch_related('items').select_related('client', 'devis__generated_doc')
+    proformas = Proforma.objects.filter(statut='en_attente').prefetch_related('items').select_related('client', 'devis__generated_doc').order_by('-date_envoie')
     return render(request, 'proforma/liste_proforma_cmc.html', {'proformas': proformas})
 
 @login_required
@@ -283,18 +287,37 @@ def offres_client(request):
         client = Client.objects.get(user=request.user)
     except Client.DoesNotExist:
         return HttpResponseForbidden("Vous n’êtes pas un client.")
-    # Proformas pour les anciens produits (quote)
-    proformas_anciens = Proforma.objects.filter(client=client, quote__isnull=False, statut="valide").select_related('quote').order_by('-date_envoie')
 
-    # Proformas pour les nouveaux produits (devis)
-    proformas_nouveaux = Proforma.objects.filter(client=client, devis__isnull=False, statut="valide").select_related('devis').order_by('-date_envoie')
+    # Fetch separately
+    proformas_nouveaux = Proforma.objects.filter(
+        client=client,
+        devis__isnull=False,
+        statut="valide"
+    ).select_related('devis').order_by('-date_envoie')
 
-    context = {
-        'proformas_anciens': proformas_anciens,
-        'proformas_nouveaux': proformas_nouveaux,
-    }
-    return render(request, 'proforma/offres_client.html', context)
+    proformas_anciens = Proforma.objects.filter(
+        client=client,
+        quote__isnull=False,
+        statut="valide"
+    ).select_related('quote').order_by('-date_envoie')
 
+    # Annotate each with type (not database annotation — just a Python field)
+    for p in proformas_nouveaux:
+        p.produit_type = "🆕 Nouveau produit"
+
+    for p in proformas_anciens:
+        p.produit_type = "🧾 Produit existant"
+
+    # Merge and sort all proformas by date_envoie descending
+    all_proformas = sorted(
+        chain(proformas_nouveaux, proformas_anciens),
+        key=attrgetter('date_envoie'),
+        reverse=True
+    )
+
+    return render(request, 'proforma/offres_client.html', {
+        'all_proformas': all_proformas
+    })
 
 @login_required
 def accepter_offre(request, proforma_id):
@@ -376,17 +399,22 @@ def produits_client(request):
 
 @login_required
 def proformas_acceptees(request):
-    # Vérifier que l'utilisateur est un client
     try:
         client = Client.objects.get(user=request.user)
     except Client.DoesNotExist:
-        return redirect('dashboard')  # Ou autre vue selon ton app
+        return redirect('dashboard')
 
-    # Récupérer toutes les proformas acceptées par ce client
-    proformas = Proforma.objects.filter(client=client, statut='acceptee').select_related('generated_doc').order_by('date_envoie')
+    proformas_qs = Proforma.objects.filter(
+        client=client,
+        statut='acceptee'
+    ).select_related('generated_doc').order_by('-date_envoie')  # Latest first
+
+    paginator = Paginator(proformas_qs, 10)  # 10 per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
 
     return render(request, 'commande/commande.html', {
-        'proformas': proformas
+        'page_obj': page_obj
     })
 
 @login_required
@@ -507,11 +535,31 @@ def liste_devis_et_quotes(request):
     except Commercial.DoesNotExist:
         return HttpResponseForbidden("Vous n'êtes pas un commercial.")
 
-    devis_list = DevisNouveauProduit.objects.filter(client__commercial=commercial)
-    quotes_list = ProduitQuote.objects.filter(client__commercial=commercial)
+    devis_qs = DevisNouveauProduit.objects.filter(client__commercial=commercial).annotate(
+        type_label=models.Value("devis", output_field=models.CharField())
+    )
 
-    return render(request, 'proforma/liste_devis_et_quotes.html', {
-        'devis_list': devis_list,
-        'quotes_list': quotes_list
+    quotes_qs = ProduitQuote.objects.filter(client__commercial=commercial).annotate(
+        type_label=models.Value("quote", output_field=models.CharField())
+    )
+
+    # Annoter manuellement le nombre de proformas
+    for devis in devis_qs:
+        devis.nb_proformas = devis.proformas.count()  # requires related_name="proformas" in model
+
+    for quote_instance in quotes_qs:
+        quote_instance.nb_proformas = quote_instance.proformas.count()  # idem
+
+    combined_list = sorted(
+        chain(devis_qs, quotes_qs),
+        key=lambda obj: obj.date_creation,
+        reverse=True
+    )
+
+    paginator = Paginator(combined_list, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "proforma/liste_devis_et_quotes.html", {
+        "page_obj": page_obj
     })
-

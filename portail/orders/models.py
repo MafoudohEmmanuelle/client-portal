@@ -19,4 +19,4 @@ class Commande(models.Model):
     date_creation = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Commande #{self.id_commande} - {self.client.nom_entreprise}"
+        return f"Commande #{self.id} - {self.client.nom_entreprise}"

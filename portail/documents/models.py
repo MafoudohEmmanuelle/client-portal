@@ -28,6 +28,6 @@ class GeneratedDoc(models.Model):
     doc = models.FileField(upload_to='generated_docs/')
     type_doc = models.CharField(max_length=50, choices=choix_document)
     date_creation = models.DateTimeField(auto_now_add=True)
-
+    commande = models.ForeignKey(Commande, null=True, blank=True, on_delete=models.SET_NULL)
     def __str__(self):
         return f"{self.type_doc} - {self.client} - {self.date_creation.strftime('%Y-%m-%d')}"
