@@ -158,7 +158,7 @@ def send_activation_email(user, request):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
     activation_link = request.build_absolute_uri(
-        reverse('activate_account', kwargs={'uidb64': uid, 'token': token})
+        reverse('set_password', kwargs={'uidb64': uid, 'token': token})
     )
     subject = f"Activation de votre compte"
 
