@@ -76,7 +76,7 @@ def register_client_cmc(request):
             client = form.save()  
             send_activation_email(client.user, request)  
             messages.success(request, "Le compte client a été créé. Un lien d'activation a été envoyé.")
-            return redirect('liste_client')  
+            return redirect('liste_client_cmc')  
         else:
             messages.error(request, "Veuillez corriger les erreurs dans le formulaire.")
     else:
