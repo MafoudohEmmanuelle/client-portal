@@ -206,7 +206,7 @@ def activate_account(request, uidb64, token):
     
     # If user or token is invalid/expired
     messages.error(request, "Lien invalide ou expiré.")
-    return redirect('login')  # Redirect to login page
+    return redirect('home')  # Redirect to login page
 
 @login_required
 def profile_view(request):

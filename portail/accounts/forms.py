@@ -105,7 +105,7 @@ class ClientRegistrationForm(forms.ModelForm):
             user = User.objects.create_user(
                 username=self.cleaned_data['nom_entreprise'], 
                 email=self.cleaned_data['email'],
-                password=None,
+                password=User.objects.make_random_password(),
                 role='client',
                 is_active=False
             )
@@ -131,7 +131,7 @@ class CommercialRegistrationForm(forms.Form):
         user = User.objects.create_user(
             username=self.cleaned_data['nom_commercial'],
             email=self.cleaned_data['email'],
-            password=None,
+            password=User.objects.make_random_password(),
             role='commercial',
             is_active=False
         )
@@ -154,7 +154,7 @@ class BERegistrationForm(forms.Form):
         user = User.objects.create_user(
             username=self.cleaned_data['username'],
             email=self.cleaned_data['email'],
-            password=None,
+            password=User.objects.make_random_password(),
             role='be',
             is_active=False
         )
@@ -173,7 +173,7 @@ class ChefCommercialRegistrationForm(forms.Form):
         user = User.objects.create_user(
             username=self.cleaned_data['username'],
             email=self.cleaned_data['email'],
-            password=None,
+            password=User.objects.make_random_password(),
             role='chef_commercial',
             is_active=False
         )
@@ -248,7 +248,7 @@ class ClientRegistrationCmcForm(forms.ModelForm):
         user = User.objects.create_user(
             username=username,
             email=email,
-            password=None,
+            password=User.objects.make_random_password(),
             role='client',
             is_active=False
         )
