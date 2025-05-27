@@ -104,7 +104,7 @@ class Cotation(models.Model):
     analyseBe=models.ForeignKey(AnalyseTechniqueBE,on_delete=models.CASCADE, null=True)
     cotation_unitaire=models.DecimalField(max_digits=10, decimal_places=2, null=True)
     quantite = models.PositiveIntegerField(null=True)
-    taux_mat= models.DecimalField(max_digits=3, decimal_places=2, null=True)
+    taux_mat = models.DecimalField(max_digits=5, decimal_places=2, null= True)
 
 class DevisNouveauProduit(models.Model):
     STATUS_CHOICES = [
