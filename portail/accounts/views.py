@@ -56,7 +56,7 @@ def user_login(request):
 @login_required
 def register_client(request):
     if request.method == 'POST':
-        form = ClientRegistrationForm(request.POST,commercial_user=request.user)
+        form = ClientRegistrationForm(request.POST,commercial_user=request.user, request=request)
         if form.is_valid():
             client = form.save()  
             messages.success(request, "Le compte client a été créé. Un lien d'activation a été envoyé.")
@@ -70,7 +70,7 @@ def register_client(request):
 @login_required
 def register_client_cmc(request):
     if request.method == 'POST':
-        form = ClientRegistrationCmcForm(request.POST)
+        form = ClientRegistrationCmcForm(request.POST, request=request)
         if form.is_valid():
             client = form.save(request=request)  
             messages.success(request, "Le compte client a été créé. Un lien d'activation a été envoyé.")
@@ -87,7 +87,7 @@ def lead_validation(request, lead_id):
     lead = get_object_or_404(LeadRequest, id=lead_id)
 
     if request.method == 'POST':
-        form = ClientRegistrationCmcForm(request.POST)
+        form = ClientRegistrationCmcForm(request.POST, request=request)
         if form.is_valid():
             client = form.save(commit=False)
             client.nom_entreprise = lead.raison_sociale
@@ -139,7 +139,7 @@ def refuser_lead(request, lead_id):
 @login_required
 def register_commercial(request):
     if request.method == 'POST':
-        form = CommercialRegistrationForm(request.POST)
+        form = CommercialRegistrationForm(request.POST, request=request)
         if form.is_valid():
             commercial = form.save()
             messages.success(request, "Le compte commercial a été créé. Un lien d'activation a été envoyé.")
