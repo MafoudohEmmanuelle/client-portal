@@ -30,4 +30,4 @@ class GeneratedDoc(models.Model):
     date_creation = models.DateTimeField(auto_now_add=True)
     commande = models.ForeignKey(Commande, null=True, blank=True, on_delete=models.SET_NULL)
     def __str__(self):
-        return f"{self.type_doc} - {self.client} - {self.date_creation.strftime('%Y-%m-%d')}"
+        return f"{self.type_doc} - {self.generated_by} - {self.date_creation.strftime('%Y-%m-%d')}"

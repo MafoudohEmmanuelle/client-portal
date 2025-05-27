@@ -168,7 +168,6 @@ def traiter_devis(request, devis_id):
         'support_formset': support_formset
     })
 
-
 @login_required
 def traiter_devis_be(request, devis_id):
     devis = get_object_or_404(DevisNouveauProduit, pk=devis_id)

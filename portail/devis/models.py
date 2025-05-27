@@ -78,9 +78,7 @@ class AnalyseTechniqueBE(models.Model):
     colle_complexage = models.CharField(max_length=100, blank=True,null=True)
     plastification = models.CharField(max_length=100, blank=True,null=True)
     decoupe = models.CharField(max_length=100, blank=True,null=True)
-
-    def __str__(self): 
-        return f"Analyse BE pour devis #{self.devis.id}"
+   
 
 class Coloration(models.Model):
     analyseTech=models.ForeignKey(AnalyseTechniqueBE, on_delete=models.CASCADE, null=True, blank=True)
