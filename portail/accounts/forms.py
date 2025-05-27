@@ -5,6 +5,7 @@ from .models import User, Client, Commercial, BE, LeadRequest
 from django_countries.widgets import CountrySelectWidget
 from phonenumber_field.formfields import PhoneNumberField
 from django_countries.fields import CountryField
+from django.contrib.auth.models import BaseUserManager
 
 
 class UserLoginForm(forms.Form):
@@ -105,7 +106,7 @@ class ClientRegistrationForm(forms.ModelForm):
             user = User.objects.create_user(
                 username=self.cleaned_data['nom_entreprise'], 
                 email=self.cleaned_data['email'],
-                password=User.objects.make_random_password(),
+                password = BaseUserManager().make_random_password(),
                 role='client',
                 is_active=False
             )
@@ -131,7 +132,7 @@ class CommercialRegistrationForm(forms.Form):
         user = User.objects.create_user(
             username=self.cleaned_data['nom_commercial'],
             email=self.cleaned_data['email'],
-            password=User.objects.make_random_password(),
+            password = BaseUserManager().make_random_password(),
             role='commercial',
             is_active=False
         )
@@ -173,7 +174,7 @@ class ChefCommercialRegistrationForm(forms.Form):
         user = User.objects.create_user(
             username=self.cleaned_data['username'],
             email=self.cleaned_data['email'],
-            password=User.objects.make_random_password(),
+            password = BaseUserManager().make_random_password(),
             role='chef_commercial',
             is_active=False
         )
@@ -248,7 +249,7 @@ class ClientRegistrationCmcForm(forms.ModelForm):
         user = User.objects.create_user(
             username=username,
             email=email,
-            password=User.objects.make_random_password(),
+           password = BaseUserManager().make_random_password(),
             role='client',
             is_active=False
         )
