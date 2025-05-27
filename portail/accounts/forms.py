@@ -5,7 +5,7 @@ from .models import User, Client, Commercial, BE, LeadRequest
 from django_countries.widgets import CountrySelectWidget
 from phonenumber_field.formfields import PhoneNumberField
 from django_countries.fields import CountryField
-
+from utils.emails import send_activation_email
 
 class UserLoginForm(forms.Form):
     username= forms.CharField( label="", widget=forms.TextInput(attrs={'class':'form-control form-control-lg', 'placeholder':'Entrez votre nom '}),required=True)
@@ -109,6 +109,8 @@ class ClientRegistrationForm(forms.ModelForm):
                 role='client',
                 is_active=False
             )
+            if self.request:
+               send_activation_email(user, self.request)
         except Exception as e:
             raise forms.ValidationError(f"Erreur lors de la création de l'utilisateur : {str(e)}")
 
@@ -135,6 +137,8 @@ class CommercialRegistrationForm(forms.Form):
             role='commercial',
             is_active=False
         )
+        if self.request:
+            send_activation_email(user, self.request)
         if commit:
             user.save()
         commercial = Commercial(
@@ -252,7 +256,8 @@ class ClientRegistrationCmcForm(forms.ModelForm):
             role='client',
             is_active=False
         )
-
+        if self.request:
+            send_activation_email(user, self.request)
         client = super().save(commit=False)
         client.user = user
 

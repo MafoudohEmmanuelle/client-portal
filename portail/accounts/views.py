@@ -59,7 +59,6 @@ def register_client(request):
         form = ClientRegistrationForm(request.POST,commercial_user=request.user)
         if form.is_valid():
             client = form.save()  
-            send_activation_email(client.user, request)
             messages.success(request, "Le compte client a été créé. Un lien d'activation a été envoyé.")
             return redirect('commercial_dashboard')  
         else:
@@ -73,8 +72,7 @@ def register_client_cmc(request):
     if request.method == 'POST':
         form = ClientRegistrationCmcForm(request.POST)
         if form.is_valid():
-            client = form.save()  
-            send_activation_email(client.user, request)  
+            client = form.save(request=request)  
             messages.success(request, "Le compte client a été créé. Un lien d'activation a été envoyé.")
             return redirect('liste_client_cmc')  
         else:
@@ -106,8 +104,7 @@ def lead_validation(request, lead_id):
             
             lead.converted = True 
             lead.save()
-            
-            send_activation_email(client.user, request)
+
             messages.success(request, "Le lead a été validé et converti en client.")
             return redirect('chef_dashboard')
     else:
@@ -145,7 +142,6 @@ def register_commercial(request):
         form = CommercialRegistrationForm(request.POST)
         if form.is_valid():
             commercial = form.save()
-            send_activation_email(commercial.user, request)
             messages.success(request, "Le compte commercial a été créé. Un lien d'activation a été envoyé.")
             return redirect('chef_dashboard')
         else:
@@ -153,26 +149,6 @@ def register_commercial(request):
     else:
         form = CommercialRegistrationForm()
     return render(request, 'accounts/com_register.html', {'form': form})
-
-def send_activation_email(user, request):
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
-    activation_link = request.build_absolute_uri(
-        reverse('set_password', kwargs={'uidb64': uid, 'token': token})
-    )
-    subject = f"Activation de votre compte"
-
-    try:
-        send_mail(
-            subject=subject,
-            message=f"Bonjour,\n\nVeuillez définir votre mot de passe en cliquant sur ce lien : {activation_link}",
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[user.email],
-            fail_silently=False  
-        )
-        print(f"[ACTIVATION EMAIL] Envoyé à {user.email}")
-    except Exception as e:
-        print(f"[ERREUR EMAIL] Impossible d’envoyer le mail d’activation : {e}")
 
 def activate_account(request, uidb64, token):
     try:
@@ -227,21 +203,6 @@ def profile_view(request):
         form = ClientProfileForm(instance=client)
 
     return render(request, 'accounts/profile_view.html', {'form': form})
-
-
-@login_required
-def resend_client_invitation(request, client_id):
-    client = get_object_or_404(Client, id=client_id)
-    user = client.utilisateur
-
-    if user.is_active:
-        messages.info(request, "Ce client a déjà activé son compte.")
-        return redirect('client_list')
-
-    send_activation_email(user, request)
-    messages.success(request, "Nouvelle invitation envoyée.")
-    return redirect('client_list')
-
 
 def lead_request(request):
     if request.method == 'POST':
