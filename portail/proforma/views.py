@@ -483,7 +483,7 @@ def submit_quote(request):
                 item.unite = unite
             item.save()
 
-        quote.statut = 'en_traitement'
+        quote.statut = 'nouveau'
         quote.save()
         envoyer_email_notification(
             "Nouvelle demande de cotation",
@@ -501,7 +501,7 @@ def liste_quotes(request):
     except Commercial.DoesNotExist:
         return HttpResponseForbidden("Vous n'êtes pas un commercial.")
 
-    quotes = ProduitQuote.objects.filter(client__commercial=commercial, statut='en_traitement')
+    quotes = ProduitQuote.objects.filter(client__commercial=commercial, statut__in=["nouveau", "en_traitement"]).order_by("-date_creation")
     return render(request, 'proforma/liste_quotes.html', {'quotes': quotes})
 
 @login_required

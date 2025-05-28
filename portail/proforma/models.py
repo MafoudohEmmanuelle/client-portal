@@ -52,8 +52,7 @@ class ProduitQuote(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     date_creation = models.DateTimeField(auto_now_add=True)
     statut = models.CharField(max_length=20, choices=[
-        ('en_attente', 'En attente'),
-        ('envoye_be', 'Envoyé au BE'),
+        ('nouveau', 'Nouveau'),
         ('en_traitement', 'En traitement'),
         ('proforma_envoyee', 'Proforma envoyée'),
     ], default='en_attente')

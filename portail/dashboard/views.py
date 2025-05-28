@@ -83,7 +83,7 @@ def commercial_dashboard(request):
         # Quotes à traiter
         unread_quotes = ProduitQuote.objects.filter(
             client__in=clients,
-            statut__in=["en_traitement"]
+            statut__in=["nouveau","en_traitement"]
         )
 
         # Devis complets

@@ -5,8 +5,8 @@ from decimal import Decimal
 
 class ProformaNouveauProduitForm(forms.ModelForm):
     prix_unitaire = forms.DecimalField(label="Prix unitaire", max_digits=10, decimal_places=2,widget=forms.NumberInput(attrs={'class': 'form-control'}))
-    modalites_reglement = forms.CharField(label="Modalités de règlement", widget=forms.Textarea(attrs={'class': 'form-control', 'row': 1 }))
-    condition_ht = forms.CharField(label="Conditions HT", required=False, widget=forms.Textarea(attrs={'class': 'form-control', 'row': 1 }))
+    modalites_reglement = forms.CharField(label="Modalités de règlement", widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 1 }))
+    condition_ht = forms.CharField(label="Conditions HT", required=False, widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 1 }))
 
     class Meta:
         model = Proforma
