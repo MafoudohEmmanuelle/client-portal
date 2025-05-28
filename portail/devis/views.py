@@ -30,7 +30,9 @@ class DevisWizard(SessionWizardView):
         devis_form = form_list[0]
         finition_form = form_list[1]
         # Save finition
-        finition = finition_form.save()
+        finition = finition_form.save(commit=False)
+        finition.pk = None 
+        finition.save()
         # Create Devis instance without saving
         devis = devis_form.save(commit=False)
         devis.client = client
