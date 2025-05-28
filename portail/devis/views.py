@@ -184,13 +184,13 @@ def traiter_devis_be(request, devis_id):
                 for form in coloration_formset:
                     if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                         coloration = form.save(commit=False)
-                        coloration.devis = devis
+                        coloration.analyseTech = analyse  
                         coloration.save()
 
                 for form in outillage_formset:
                     if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                         outil = form.save(commit=False)
-                        outil.devis = devis
+                        outil.analyse = analyse  
                         outil.save()
 
                 for coform in cotation_formset:
@@ -202,10 +202,10 @@ def traiter_devis_be(request, devis_id):
                 context = {
                     'devis': devis, 
                     'supports': devis.supports.all(),  
-                    'analyse': devis.analyseBE,
-                    'colorations': devis.analyseBE.coloration_set.all() if devis.analyseBE else [],
-                    'outillages': devis.analyseBE.outillage_set.all() if devis.analyseBE else [],
-                    'cotation': devis.analyseBE.cotation_set.all() if devis.analyseBE else [],
+                    'analyse': analyse,
+                    'colorations': Coloration.objects.filter(analyseTech=analyse) if analyse else [],
+                    'outillages': Outillage.objects.filter(analyse=analyse) if analyse else [],
+                    'cotations': Cotation.objects.filter(analyseBe=analyse) if analyse else [],
                 }
                 html = render_to_string('devis/devis_template.html', context)
                 result = BytesIO()
@@ -240,7 +240,7 @@ def traiter_devis_be(request, devis_id):
         form = BEDevisForm()
         coloration_formset = ColorationFormSet(prefix='coloration', queryset=Coloration.objects.none())
         outillage_formset = OutillageFormSet(prefix='outillage', queryset=Outillage.objects.none())
-        cotation_formset = CotationFormSet(prefix='cotation')
+        cotation_formset = CotationFormSet(prefix='cotation', queryset=Cotation.objects.none())
 
 
     return render(request, 'devis/traiter_devis_be.html', {

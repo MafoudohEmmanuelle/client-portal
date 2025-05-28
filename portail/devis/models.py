@@ -79,7 +79,6 @@ class AnalyseTechniqueBE(models.Model):
     plastification = models.CharField(max_length=100, blank=True,null=True)
     decoupe = models.CharField(max_length=100, blank=True,null=True)
    
-
 class Coloration(models.Model):
     analyseTech=models.ForeignKey(AnalyseTechniqueBE, on_delete=models.CASCADE, null=True, blank=True)
     couleur=models.CharField(max_length=20,null=True, blank=True)
