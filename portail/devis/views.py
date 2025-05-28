@@ -186,18 +186,21 @@ def traiter_devis_be(request, devis_id):
                 for form in coloration_formset:
                     if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                         coloration = form.save(commit=False)
+                        coloration.pk = None
                         coloration.analyseTech = analyse  
                         coloration.save()
 
                 for form in outillage_formset:
                     if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                         outil = form.save(commit=False)
+                        outil.pk = None
                         outil.analyse = analyse  
                         outil.save()
 
                 for coform in cotation_formset:
                     if coform.is_valid():
                         cotation = coform.save(commit=False)
+                        cotation.pk = None
                         cotation.analyseBe = analyse
                         cotation.save()
 
