@@ -58,8 +58,10 @@ def register_client(request):
     if request.method == 'POST':
         form = ClientRegistrationForm(request.POST,commercial_user=request.user)
         if form.is_valid():
-            client = form.save()  
-            send_activation_email(client.user, request)
+            client = form.save()
+            user=client.user.set_unusable_password()
+            user.save()
+            send_activation_email(user, request)
             messages.success(request, "Le compte client a été créé. Un lien d'activation a été envoyé.")
             return redirect('commercial_dashboard')  
         else:
@@ -160,50 +162,44 @@ def send_activation_email(user, request):
     activation_link = request.build_absolute_uri(
         reverse('set_password', kwargs={'uidb64': uid, 'token': token})
     )
-    subject = f"Activation de votre compte"
 
-    try:
-        send_mail(
-            subject=subject,
-            message=f"Bonjour,\n\nVeuillez définir votre mot de passe en cliquant sur ce lien : {activation_link}",
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[user.email],
-            fail_silently=False  
-        )
-        print(f"[ACTIVATION EMAIL] Envoyé à {user.email}")
-    except Exception as e:
-        print(f"[ERREUR EMAIL] Impossible d’envoyer le mail d’activation : {e}")
+    subject = "Activation de votre compte"
+    message = (
+        f"Bonjour {user.username},\n\n"
+        f"Veuillez définir votre mot de passe en cliquant sur ce lien :\n{activation_link}\n\n"
+        f"Ce lien est à usage unique et expirera sous peu."
+    )
+
+    send_mail(
+        subject,
+        message,
+        settings.EMAIL_HOST_USER,
+        [user.email],
+        fail_silently=False
+    )
 
 def activate_account(request, uidb64, token):
     try:
-        # Decode the UID and retrieve the corresponding user
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
 
-    # If a valid user and token are found
     if user and default_token_generator.check_token(user, token):
-        # Process the password reset form
         if request.method == 'POST':
             form = SetPasswordForm(user, request.POST)
             if form.is_valid():
                 form.save()
-                user.is_active = True  # Activate the user account
+                user.is_active = True  # Activate account now
                 user.save()
-                messages.success(request, "Votre mot de passe a été défini. Votre compte est maintenant activé.")
-                return redirect('login')  # Redirect to login page after activation
-            else:
-                messages.error(request, "Veuillez corriger les erreurs dans le formulaire.")
+                messages.success(request, "Mot de passe défini. Votre compte est activé.")
+                return redirect('login')
         else:
             form = SetPasswordForm(user)
-
-        # Render the password reset form
         return render(request, 'accounts/password.html', {'form': form})
-    
-    # If user or token is invalid/expired
+
     messages.error(request, "Lien invalide ou expiré.")
-    return redirect('home')  # Redirect to login page
+    return redirect('home')
 
 @login_required
 def profile_view(request):
