@@ -5,7 +5,6 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from accounts.forms import UserCreationForm
 from django.contrib.auth.forms import UserChangeForm
 
-admin.site.register(User)
 admin.site.register(Client)
 admin.site.register(Commercial)
 admin.site.register(LeadRequest)
@@ -34,5 +33,4 @@ class UserAdmin(BaseUserAdmin):
         super().save_model(request, obj, form, change)
         send_activation_email(obj, request)
 
-admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
