@@ -46,8 +46,6 @@ class ProformaItem(models.Model):
     def __str__(self):
         return f"{self.designation} (x{self.quantite})"
 
-# --- For old product selection ---
-
 class ProduitQuote(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     date_creation = models.DateTimeField(auto_now_add=True)

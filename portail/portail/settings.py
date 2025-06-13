@@ -82,29 +82,6 @@ DATABASES = {
     )
 }
 
-"""
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'portail',
-        'USER': 'postgres',
-        'PASSWORD': 'maman2021',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-
-#  Email settings
-
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = False
-"""
-
-
 EMAIL_HOST = config("EMAIL_HOST")
 EMAIL_PORT = config("EMAIL_PORT", cast=int)
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)
