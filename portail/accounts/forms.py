@@ -1,10 +1,19 @@
 from django import forms
-from django.contrib.auth.forms import SetPasswordForm as DjangoSetPasswordForm
+from django.contrib.auth.forms import UserCreationForm, SetPasswordForm as DjangoSetPasswordForm
 from django.utils import timezone
 from .models import User, Client, Commercial, BE, LeadRequest
 from django_countries.widgets import CountrySelectWidget
 from phonenumber_field.formfields import PhoneNumberField
 from django_countries.fields import CountryField
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'role')  
 
 
 class UserLoginForm(forms.Form):
