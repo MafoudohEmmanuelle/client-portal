@@ -200,7 +200,7 @@ def activate_account(request, uidb64, token):
             form = SetPasswordForm(user)
         return render(request, 'accounts/password.html', {'form': form})
 
-    messages.error(request, "Lien invalide ou expiré.")
+    #messages.error(request, "Lien invalide ou expiré.")
     return redirect('home')
 
 @login_required
