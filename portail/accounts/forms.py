@@ -10,10 +10,18 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class CustomUserCreationForm(UserCreationForm):
+class UserCreationForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('username', 'email', 'role')  
+        fields = ('username', 'email', 'role')
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_unusable_password()  # Prevents manual login until password is set
+        if commit:
+            user.is_active=False
+            user.save()
+        return user  
 
 
 class UserLoginForm(forms.Form):
@@ -154,41 +162,6 @@ class CommercialRegistrationForm(forms.Form):
         if commit:
             commercial.save()
         return commercial
-
-class BERegistrationForm(forms.Form):
-    email = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    username = forms.CharField(label="Nom utilisateur", widget=forms.TextInput(attrs={'class': 'form-control'}))
-
-    def save(self, commit=True):
-        user = User.objects.create_user(
-            username=self.cleaned_data['username'],
-            email=self.cleaned_data['email'],
-            password=None,
-            role='be',
-            is_active=False
-        )
-        if commit:
-            user.save()
-        be = BE(utilisateur=user)
-        if commit:
-            be.save()
-        return be
-
-class ChefCommercialRegistrationForm(forms.Form):
-    email = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    username = forms.CharField(label="Nom utilisateur", widget=forms.TextInput(attrs={'class': 'form-control'}))
-
-    def save(self, commit=True):
-        user = User.objects.create_user(
-            username=self.cleaned_data['username'],
-            email=self.cleaned_data['email'],
-            password=None,
-            role='chef_commercial',
-            is_active=False
-        )
-        if commit:
-            user.save()
-        return user
 
 class ClientProfileForm(forms.ModelForm):
     class Meta:
