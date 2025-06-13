@@ -5,6 +5,7 @@ from .models import User, Client, Commercial, BE, LeadRequest
 from django_countries.widgets import CountrySelectWidget
 from phonenumber_field.formfields import PhoneNumberField
 from django_countries.fields import CountryField
+from django.contrib.auth.hashers import make_password
 
 from django.contrib.auth import get_user_model
 
@@ -17,7 +18,7 @@ class UserCreationForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_unusable_password()  # Prevents manual login until password is set
+        user.password = make_password(None)
         if commit:
             user.is_active=False
             user.save()
