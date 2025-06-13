@@ -35,6 +35,8 @@ def user_login(request):
                 if user.is_active:
                     login(request, user)
                     messages.success(request, "Connexion réussie!")
+                    if user.is_superuser:
+                        return redirect('/admin/')
                     # Redirection par rôle
                     if user.role.lower() in ['client']: 
                         return redirect('client_dashboard')
