@@ -16,8 +16,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Count
 from utils.emails import envoyer_email_notification
-from utils.activation import generate_activation_token,verify_activation_token
-
+from utils.activation import account_activation_token
 
 User = get_user_model()
 
@@ -161,10 +160,10 @@ def register_commercial(request):
 
 def send_activation_email(user, request):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token, timestamp = generate_activation_token(user)
+    token = account_activation_token.make_token(user)
 
     activation_link = request.build_absolute_uri(
-        reverse('set_password', kwargs={'uidb64': uid, 'token': token, 'timestamp': timestamp})
+        reverse('set_password', kwargs={'uidb64': uid, 'token': token})
     )
 
     subject = "Activation de votre compte"
@@ -182,14 +181,14 @@ def send_activation_email(user, request):
         fail_silently=False
     )
 
-def activate_account(request, uidb64, token, timestamp):
+def activate_account(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
 
-    if user and verify_activation_token(user, token, int(timestamp)):
+    if user is not None and account_activation_token.check_token(user, token):
         if request.method == 'POST':
             form = SetPasswordForm(user, request.POST)
             if form.is_valid():

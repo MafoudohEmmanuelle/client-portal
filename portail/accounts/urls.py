@@ -16,5 +16,5 @@ urlpatterns = [
     path('client/register/cmc/',views.register_client_cmc, name='register_client_cmc'),
     path('lead/validation/<int:lead_id>/', views.lead_validation, name='lead_validation'),
     path('lead/<int:lead_id>/refuser/', views.refuser_lead, name='refuser_lead'),
-    path('activate/<uidb64>/<token>/<int:timestamp>/', views.activate_account, name='set_password'),
+    path('activate/<uidb64>/<token>/', views.activate_account, name='set_password'),
 ]
