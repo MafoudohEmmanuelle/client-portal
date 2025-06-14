@@ -4,6 +4,7 @@ from accounts.views import send_activation_email
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from accounts.forms import UserCreationForm
 from django.contrib.auth.forms import UserChangeForm
+from django.contrib import messages
 
 admin.site.register(Client)
 admin.site.register(Commercial)
@@ -28,11 +29,15 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('username', 'email', 'role', 'is_active')}
         ),
     )
-def save_model(request, obj, form, change):
-    if not change: 
+def save_model(self, request, obj, form, change):
+    if not change:
         obj.is_active = False
     super().save_model(request, obj, form, change)
     if not change:
-        send_activation_email(obj, request)
+        try:
+            send_activation_email(obj, request)
+            self.message_user(request, "Le mail d'activation a été envoyé avec succès.", level=messages.SUCCESS)
+        except Exception as e:
+            self.message_user(request, f"Erreur lors de l'envoi du mail : {e}", level=messages.ERROR)
 
 admin.site.register(User, UserAdmin)
