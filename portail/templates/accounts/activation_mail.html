@@ -1,0 +1,9 @@
+{% autoescape off%}
+<p>Salut {{ user.username }},</p>
+
+<p>Veuillez définir votre mot de passe en cliquant sur le lien ci-dessous :</p>
+
+<p><a href="{% url 'set_password' uidb64=uid token=token %}">Définir mon mot de passe</a></p>
+
+<p>Ce lien expirera dans 24 heures.</p>
+{% endautoescape %}

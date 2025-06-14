@@ -28,9 +28,11 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('username', 'email', 'role', 'is_active')}
         ),
     )
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
+def save_model(request, obj, form, change):
+    if not change: 
+        obj.is_active = False
+    super().save_model(request, obj, form, change)
+    if not change:
         send_activation_email(obj, request)
 
 admin.site.register(User, UserAdmin)

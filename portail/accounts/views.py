@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import authenticate, login,get_user_model,logout
 from django.contrib import messages
 from .forms import (
@@ -8,15 +7,16 @@ from .forms import (
 )
 from .models import User, Client, Commercial, LeadRequest, ChefCommercial
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.conf import settings
 from django.db.models import Count
 from utils.emails import envoyer_email_notification
-from utils.activation import account_activation_token
+from django.template.loader import render_to_string
+
+from .token import account_activation_token
 
 User = get_user_model()
 
@@ -110,8 +110,10 @@ def lead_validation(request, lead_id):
             
             lead.converted = True 
             lead.save()
-            
-            send_activation_email(client.user, request)
+            user=client.user
+            user.is_active=False
+            user.save()
+            send_activation_email(user, request)
             messages.success(request, "Le lead a été validé et converti en client.")
             return redirect('chef_dashboard')
     else:
@@ -149,7 +151,9 @@ def register_commercial(request):
         form = CommercialRegistrationForm(request.POST)
         if form.is_valid():
             commercial = form.save()
-            send_activation_email(commercial.user, request)
+            user=commercial.useruser.is_active=False
+            user.save()
+            send_activation_email(user, request)
             messages.success(request, "Le compte commercial a été créé. Un lien d'activation a été envoyé.")
             return redirect('chef_dashboard')
         else:
@@ -159,27 +163,17 @@ def register_commercial(request):
     return render(request, 'accounts/com_register.html', {'form': form})
 
 def send_activation_email(user, request):
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token = account_activation_token.make_token(user)
-
-    activation_link = request.build_absolute_uri(
-        reverse('set_password', kwargs={'uidb64': uid, 'token': token})
-    )
-
     subject = "Activation de votre compte"
-    message = (
-        f"Bonjour {user.username},\n\n"
-        f"Veuillez définir votre mot de passe en cliquant sur ce lien :\n{activation_link}\n\n"
-        f"Ce lien expirera dans 24 heures."
-    )
-
-    send_mail(
-        subject,
-        message,
-        settings.EMAIL_HOST_USER,
-        [user.email],
-        fail_silently=False
-    )
+    message= render_to_string("accounts/activation_mail.html"),{
+        'user': user,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+    }
+    email = EmailMessage(subject,message,from_email=settings.EMAIL_HOST_USER,to=[user.email])
+    if email.send():
+        messages.success(request,"Le mail d'activation a ete envoye avec success")
+    else:
+        messages.error(request,"Un probleme est survenu lors de l'\envoie du mail")
 
 def activate_account(request, uidb64, token):
     try:
@@ -199,10 +193,9 @@ def activate_account(request, uidb64, token):
                 return redirect('login')
         else:
             form = SetPasswordForm(user)
-        return render(request, 'accounts/password.html', {'form': form})
-
-    messages.error(request, "Lien invalide ou expiré.")
-    return redirect('home')
+        return render(request, 'accounts/password.html', {'form': form, 'validlink': True})
+    
+    return render(request, 'accounts/password.html', {'validlink': False})
 
 @login_required
 def profile_view(request):
