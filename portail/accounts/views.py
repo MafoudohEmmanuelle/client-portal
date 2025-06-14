@@ -164,16 +164,19 @@ def register_commercial(request):
 
 def send_activation_email(user, request):
     subject = "Activation de votre compte"
-    message= render_to_string("accounts/activation_mail.html"),{
+    message = render_to_string("accounts/activation_mail.html", {
         'user': user,
         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
         'token': account_activation_token.make_token(user),
-    }
-    email = EmailMessage(subject,message,from_email=settings.EMAIL_HOST_USER,to=[user.email])
-    if email.send():
-        messages.success(request,"Le mail d'activation a ete envoye avec success")
-    else:
-        messages.error(request,"Un probleme est survenu lors de l'\envoie du mail")
+    })
+    email = EmailMessage(subject, message, from_email=settings.EMAIL_HOST_USER, to=[user.email])
+    
+    try:
+        email.send(fail_silently=False)
+        messages.success(request, "Le mail d'activation a été envoyé avec succès.")
+    except Exception as e:
+        messages.error(request, "Un problème est survenu lors de l'envoi du mail.")
+        print(f"Erreur d'envoi de mail : {e}")
 
 def activate_account(request, uidb64, token):
     try:
