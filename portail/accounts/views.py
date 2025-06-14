@@ -10,11 +10,10 @@ from django.contrib.auth.decorators import login_required
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.urls import reverse
-from django.core.mail import EmailMessage
+from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Count
 from utils.emails import envoyer_email_notification
-from django.template.loader import render_to_string
 
 from .token import account_activation_token
 
@@ -163,20 +162,26 @@ def register_commercial(request):
     return render(request, 'accounts/com_register.html', {'form': form})
 
 def send_activation_email(user, request):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = account_activation_token.make_token(user)
+    activation_link = request.build_absolute_uri(
+        reverse('set_password', kwargs={'uidb64': uid, 'token': token})
+    )
+
     subject = "Activation de votre compte"
-    message = render_to_string("accounts/activation_mail.html", {
-        'user': user,
-        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-        'token': account_activation_token.make_token(user),
-    })
-    email = EmailMessage(subject, message, from_email=settings.EMAIL_HOST_USER, to=[user.email])
-    email.content_subtype = "html"
-    try:
-        email.send(fail_silently=False)
-        messages.success(request, "Le mail d'activation a été envoyé avec succès.")
-    except Exception as e:
-        messages.error(request, "Un problème est survenu lors de l'envoi du mail.")
-        print(f"Erreur d'envoi de mail : {e}")
+    message = (
+        f"Bonjour {user.username},\n\n"
+        f"Veuillez définir votre mot de passe en cliquant sur ce lien :\n{activation_link}\n\n"
+        f"Ce lien est à usage unique et expirera sous peu."
+    )
+
+    send_mail(
+        subject,
+        message,
+        settings.EMAIL_HOST_USER,
+        [user.email],
+        fail_silently=False
+    )
 
 def activate_account(request, uidb64, token):
     try:
