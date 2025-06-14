@@ -140,6 +140,12 @@ class CommercialRegistrationForm(forms.Form):
     contact = forms.CharField(label="Contact", widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={'class': 'form-control'}))
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Cette adresse email est déjà utilisée.")
+        return email
+
     def save(self, commit=True):
         user = User(
             username=self.cleaned_data['nom_commercial'],
@@ -152,7 +158,7 @@ class CommercialRegistrationForm(forms.Form):
             user.save()
 
         commercial = Commercial(
-            utilisateur=user,
+            user=user,
             nom_commercial=self.cleaned_data['nom_commercial'],
             contact=self.cleaned_data['contact']
         )

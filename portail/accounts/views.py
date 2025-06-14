@@ -150,7 +150,7 @@ def register_commercial(request):
         form = CommercialRegistrationForm(request.POST)
         if form.is_valid():
             commercial = form.save()
-            user=commercial.useruser.is_active=False
+            user=commercial.user.is_active=False
             user.save()
             send_activation_email(user, request)
             messages.success(request, "Le compte commercial a été créé. Un lien d'activation a été envoyé.")
