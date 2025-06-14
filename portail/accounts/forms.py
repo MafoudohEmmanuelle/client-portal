@@ -5,8 +5,6 @@ from .models import User, Client, Commercial, BE, LeadRequest
 from django_countries.widgets import CountrySelectWidget
 from phonenumber_field.formfields import PhoneNumberField
 from django_countries.fields import CountryField
-from django.contrib.auth.hashers import make_password
-
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -18,17 +16,15 @@ class UserCreationForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.password = make_password(None)
+        user.set_unusable_password()
+        user.is_active = False
         if commit:
-            user.is_active=False
             user.save()
-        return user  
-
+        return user
 
 class UserLoginForm(forms.Form):
     username= forms.CharField( label="", widget=forms.TextInput(attrs={'class':'form-control form-control-lg', 'placeholder':'Entrez votre nom '}),required=True)
     password= forms.CharField( label="", widget=forms.PasswordInput(attrs={'class':'form-control form-control-lg', 'placeholder':'Entrez votre mot de passe'}),required=True)
-
 
 class SetPasswordForm(DjangoSetPasswordForm):
     def __init__(self, user, *args, **kwargs):
@@ -118,15 +114,16 @@ class ClientRegistrationForm(forms.ModelForm):
         return email
 
     def save(self, commit=True):
-        # Création de l'utilisateur lié
         try:
-            user = User.objects.create_user(
+            user = User(
                 username=self.cleaned_data['nom_entreprise'], 
                 email=self.cleaned_data['email'],
-                password=None,
                 role='client',
                 is_active=False
             )
+            user.set_unusable_password()
+            if commit:
+                user.save()
         except Exception as e:
             raise forms.ValidationError(f"Erreur lors de la création de l'utilisateur : {str(e)}")
 
@@ -135,10 +132,8 @@ class ClientRegistrationForm(forms.ModelForm):
         if self.commercial_user:
             client.commercial = self.commercial_user
         if commit:
-            user.save()
             client.save()
         return client
-
 
 class CommercialRegistrationForm(forms.Form):
     nom_commercial = forms.CharField(label="Nom du commercial", max_length=255, widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -146,15 +141,16 @@ class CommercialRegistrationForm(forms.Form):
     email = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={'class': 'form-control'}))
 
     def save(self, commit=True):
-        user = User.objects.create_user(
+        user = User(
             username=self.cleaned_data['nom_commercial'],
             email=self.cleaned_data['email'],
-            password=None,
             role='commercial',
             is_active=False
         )
+        user.set_unusable_password()
         if commit:
             user.save()
+
         commercial = Commercial(
             utilisateur=user,
             nom_commercial=self.cleaned_data['nom_commercial'],
@@ -228,22 +224,18 @@ class ClientRegistrationCmcForm(forms.ModelForm):
         email = self.cleaned_data['email']
         username = self.cleaned_data['nom_entreprise']
 
-        user = User.objects.create_user(
+        user = User(
             username=username,
             email=email,
-            password=None,
             role='client',
             is_active=False
         )
+        user.set_unusable_password()
+        if commit:
+            user.save()
 
         client = super().save(commit=False)
         client.user = user
-
         if commit:
-            user.save()
             client.save()
-
         return client
-    
-
-  
