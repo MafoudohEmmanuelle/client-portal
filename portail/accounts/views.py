@@ -16,6 +16,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Count
 from utils.emails import envoyer_email_notification
+from utils.activation import generate_activation_token,verify_activation_token
 
 
 User = get_user_model()
@@ -160,16 +161,17 @@ def register_commercial(request):
 
 def send_activation_email(user, request):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
+    token, timestamp = generate_activation_token(user)
+
     activation_link = request.build_absolute_uri(
-        reverse('set_password', kwargs={'uidb64': uid, 'token': token})
+        reverse('set_password', kwargs={'uidb64': uid, 'token': token, 'timestamp': timestamp})
     )
 
     subject = "Activation de votre compte"
     message = (
         f"Bonjour {user.username},\n\n"
         f"Veuillez définir votre mot de passe en cliquant sur ce lien :\n{activation_link}\n\n"
-        f"Ce lien est à usage unique et expirera sous peu."
+        f"Ce lien expirera dans 24 heures."
     )
 
     send_mail(
@@ -180,19 +182,19 @@ def send_activation_email(user, request):
         fail_silently=False
     )
 
-def activate_account(request, uidb64, token):
+def activate_account(request, uidb64, token, timestamp):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
 
-    if user and default_token_generator.check_token(user, token):
+    if user and verify_activation_token(user, token, int(timestamp)):
         if request.method == 'POST':
             form = SetPasswordForm(user, request.POST)
             if form.is_valid():
                 form.save()
-                user.is_active = True  # Activate account now
+                user.is_active = True
                 user.save()
                 messages.success(request, "Mot de passe défini. Votre compte est activé.")
                 return redirect('login')
@@ -230,7 +232,7 @@ def profile_view(request):
 @login_required
 def resend_client_invitation(request, client_id):
     client = get_object_or_404(Client, id=client_id)
-    user = client.utilisateur
+    user = client.user
 
     if user.is_active:
         messages.info(request, "Ce client a déjà activé son compte.")
@@ -248,12 +250,11 @@ def lead_request(request):
             lead=form.save()
             messages.success(request, "Votre demande a été enregistrée.")
             chef_commercial=ChefCommercial.objects.get(pk=1)
-            """
             envoyer_email_notification(
                 "Proforma à valider",
                 f"La requete de creation de compte du prospect de {lead.raison_sociale} est en attente de validation.",
                 [chef_commercial.user.email]
-            )"""
+            )
             return redirect('home')
         else:
             messages.error(request, "Veuillez corriger les erreurs dans le formulaire.")
