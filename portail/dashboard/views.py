@@ -53,6 +53,8 @@ def client_dashboard(request):
         commandes_delivered = Commande.objects.filter(client=client, statut='delivered').count()
         latest_commandes = Commande.objects.filter(client=client).order_by('-date_creation')[:5]
         docs_count = Document.objects.filter(commande__client=client).count()
+        devis_total = DevisNouveauProduit.objects.filter(client=client).count()
+        devis_status_counts = DevisNouveauProduit.objects.filter(client=client).values('statut').annotate(count=Count('id'))
         return render(request,'dashboard/client_dashboard.html',{
             'offres_en_attente': offres_en_attente , 
             'nb_produits': nb_produits,
@@ -61,6 +63,8 @@ def client_dashboard(request):
             'commandes_delivered': commandes_delivered,
             'latest_commandes': latest_commandes,
             'docs_count': docs_count,
+            'devis_total': devis_total,
+            'devis_status_counts': devis_status_counts,
             })
     else:
         return redirect('user_login')
