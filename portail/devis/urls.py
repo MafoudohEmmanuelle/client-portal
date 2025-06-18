@@ -10,4 +10,5 @@ urlpatterns = [
     path('devis/BE/traiter/<int:devis_id>/', views.traiter_devis_be, name='traiter_devis_be'),
     path('devis/complet',views.devis_complet, name='devis_complet'),
     path('devis/detail/<int:devis_id>/', views.detail_devis, name='detail_devis'),
+    path('mes-devis/', views.devis_client, name='devis_client'),
 ]

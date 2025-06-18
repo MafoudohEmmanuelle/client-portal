@@ -108,10 +108,10 @@ class Cotation(models.Model):
 class DevisNouveauProduit(models.Model):
     STATUS_CHOICES = [
         ('nouveau', 'Nouveau'),    
-        ('en_traitement', 'En traitement'), 
-        ('envoye_be', 'Nouveau Devis'),
-        ('en_traitement_be','En cour de traitement'),
-        ('complet', 'Devis Complet'),
+        ('en_traitement', 'En traitement par le Commercial'), 
+        ('envoye_be', 'Envoyer au BE'),
+        ('en_traitement_be','En cour de traitement par le BE'),
+        ('complet', 'Traitement complet'),
         ('finalise', 'Finaliséé')
     ]
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='devis')

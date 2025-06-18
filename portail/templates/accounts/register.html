@@ -126,29 +126,54 @@
 
   </div>
 </div>
-
-
 <script>
-  const countryPrefixes = {
-    'FR': '+33', 'BE': '+32', 'CH': '+41', 'DE': '+49',
-    'ES': '+34', 'IT': '+39', 'MA': '+212', 'US': '+1', 'UK': '+44'
-  };
+    const countryPrefixes = {
+        'CM': '+237', // Cameroon
+        'FR': '+33',  // France
+        'BE': '+32',  // Belgium
+        'CH': '+41',  // Switzerland
+        'DE': '+49',  // Germany
+        'ES': '+34',  // Spain
+        'IT': '+39',  // Italy
+        'MA': '+212', // Morocco
+        'US': '+1',   // United States
+        'UK': '+44',  // United Kingdom
+        'CN': '+86',  // China
+        'IN': '+91',  // India
+        'NG': '+234', // Nigeria
+        'DZ': '+213', // Algeria
+        'SN': '+221', // Senegal
+        'CI': '+225', // Ivory Coast
+        'GH': '+233', // Ghana
+        'ZA': '+27',  // South Africa
+        'CA': '+1',   // Canada
+        'RU': '+7',   // Russia
+        'BR': '+55',  // Brazil
+        'AU': '+61',  // Australia
+        'JP': '+81',  // Japan
+        'KR': '+82',  // South Korea
+        'EG': '+20',  // Egypt
+        'SA': '+966', // Saudi Arabia
+        'AE': '+971', // United Arab Emirates
+        'TN': '+216', // Tunisia
+        'KE': '+254', // Kenya
+        'TZ': '+255', // Tanzania
+    };
 
-  const paysSelect = document.querySelector('select[name="pays"]');
-  const telInput = document.querySelector('input[name="telephone"]');
-
-  function setPrefix() {
-    const selected = paysSelect?.value;
-    const prefix = countryPrefixes[selected];
-    if (!prefix) return;
-    if (telInput && (telInput.value === '' || !telInput.value.startsWith('+'))) {
-      telInput.value = prefix + ' ';
-    }
-  }
-
-  if (paysSelect && telInput) {
-    paysSelect.addEventListener('change', setPrefix);
-    window.addEventListener('load', setPrefix);
-  }
+    document.addEventListener('DOMContentLoaded', function () {
+        const countrySelects = document.querySelectorAll('select[name$="pays"]');
+        countrySelects.forEach(select => {
+            select.addEventListener('change', function () {
+                const prefix = countryPrefixes[this.value];
+                if (prefix) {
+                    const form = this.closest('form');
+                    const phoneInput = form.querySelector('input[name$="telephone"]');
+                    if (phoneInput && (phoneInput.value === '' || !phoneInput.value.startsWith('+'))) {
+                        phoneInput.value = prefix + ' ';
+                    }
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

@@ -13,6 +13,7 @@ from io import BytesIO
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 from utils.emails import envoyer_email_notification
+from django.core.paginator import Paginator
 
 class DevisWizard(SessionWizardView): 
     form_list = [
@@ -278,3 +279,20 @@ def detail_devis(request, devis_id):
         'devis': devis
     })
 
+def devis_client(request):
+    if request.user.is_authenticated:
+        try:
+            client = Client.objects.get(user=request.user)
+        except Client.DoesNotExist:
+            return HttpResponseForbidden("Vous n'êtes pas un client.")
+
+        devis_list = DevisNouveauProduit.objects.filter(client=client).order_by('-date_creation')
+        paginator = Paginator(devis_list, 10) 
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        return render(request, 'devis/devis_client.html', {
+            'page_obj': page_obj
+        })
+    else:
+        return redirect('login')
