@@ -94,7 +94,7 @@ def lead_validation(request, lead_id):
     if request.method == 'POST':
         form = ClientRegistrationCmcForm(request.POST)
         if form.is_valid():
-            client = form.save(commit=False)
+            client = form.save()
             client.nom_entreprise = lead.raison_sociale
             client.interlocuteur = lead.interlocuteur
             client.user.email=lead.email
@@ -110,6 +110,7 @@ def lead_validation(request, lead_id):
             lead.converted = True 
             lead.save()
             user=client.user
+            user.email = lead.email
             user.is_active=False
             user.save()
             send_activation_email(user, request)
